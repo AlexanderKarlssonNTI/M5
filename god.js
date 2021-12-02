@@ -8,7 +8,7 @@ class Room {
     Baptist() {
         const adj = ["bloody","bleak","dark","clean","dirty","cozy","heavenly","hellish","beautiful","neverending", "holy", "lovely","empty"];
         const plc = ["hallway","room","corridor","toilet","kitchen","basement","bedroom", "dining room","garden","chapel","dining hall","bathroom"];
-        const dsc = ["death","despair","hopelessnes","healing","horror","happines","joy","bliss", "buisness","love","sin","sin","hope"];
+        const dsc = ["death","despair","hopelessnes","healing","horror","happines","joy","bliss", "buisness","love","sin","virtue","hope"];
         let word1 = adj[Math.floor(Math.random() * adj.length)];
         let word2 = plc[Math.floor(Math.random() * plc.length)];
         let word3 = dsc[Math.floor(Math.random() * dsc.length)];
@@ -18,19 +18,19 @@ class Room {
 }
 
 class World {
-    constructor(Name, Type, parameter) {
+    constructor(Name, Type, parameter1, parameter2) {
         this.name = Name;
         this.type = Type;
         this.rooms = new Array;
         switch(Type) {
             case "circle":
-                this.generateCircleWorld(parameter);
+                this.generateCircleWorld(parameter1);
                 break;
             case "rectangle":
-                this.generateRectangleWorld(parameter);
+                this.generateRectangleWorld(parameter1,parameter2);
                 break;
             case "branch":
-                this.generateBranchWorld(parameter);
+                this.generateBranchWorld(parameter1,parameter2);
                 break;
             default:
                 console.log("Error: Invalid inputs");
@@ -54,11 +54,49 @@ class World {
         }
     }
 
-    generateRectangleWorld(nrOfRooms) {}
+    generateRectangleWorld(length, width) {
+        if (length == 1) {
+            this.rooms.push(new Room(1));
+        }
+        else if (length > 1) {
+            this.rooms.push(new Room(1));
+            for (let x = 1; x < length;x++) {
+                this.rooms.push(new Room(x+1));
+                this.rooms[x-1].exits.push(this.rooms[x].ID);
+                this.rooms[x].exits.push(this.rooms[x-1].ID);
+            }
+            for (let y = 1; y < width; y++) {
+                this.rooms.push(new Room(length*y+1));
+                for (let x = 1; x < length;x++) {
+                    this.rooms.push(new Room(length*y+x+1));
+                    this.rooms[length*y+x-1].exits.push(this.rooms[length*y+x].ID);
+                    this.rooms[length*y+x].exits.push(this.rooms[length*y+x-1].ID);
+                }
+                for (let x = 1; x <= length;x++) {
+                    this.rooms[length*y+x-1].exits.push(this.rooms[length*(y-1)+x-1].ID);
+                    this.rooms[length*(y-1)+x-1].exits.push(this.rooms[length*y+x-1].ID);
+                }
+            }
+        }
+    }
 
-    generateBranchWorld(nrOfRooms) {}
+    generateBranchWorld(mainbranch,factor) {
+        if (mainbranch == 1) {
+            this.rooms.push(new Room(1));
+        }
+        else if (length > 1) {
+            for (let y = 0; y < width; y++) {
+                this.rooms.push(new Room(length*y+1));
+                for (let x = 1; x < length;x++) {
+                    this.rooms.push(new Room(length*y+x+1));
+                    this.rooms[length*y+x-1].exits.push(this.rooms[length*y+x].ID);
+                    this.rooms[length*y+x].exits.push(this.rooms[length*y+x-1].ID);
+                }
+            }
+        }
+    }
 }
 
-const test = new World('jeff', 'circle',5);
+const test = new World('jeff', 'rectangle',2,5);
 
 console.log(test.rooms);
