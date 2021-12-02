@@ -2,6 +2,7 @@ class Room {
     constructor(id) {
         this.name = this.Baptist();
         this.ID = id;
+        this.exits = new Array;
     }
 
     Baptist() {
@@ -32,16 +33,32 @@ class World {
                 this.generateBranchWorld(parameter);
                 break;
             default:
-                console.log();
+                console.log("Error: Invalid inputs");
         }
     }
-    generateCircleWorld(nrOfRooms) {}
+    generateCircleWorld(nrOfRooms) {
+        if (nrOfRooms == 1) {
+            this.rooms.push(new Room(1));
+        }
+        else if (nrOfRooms > 1) {
+            this.rooms.push(new Room(1));
+            for (let x = 1; x < nrOfRooms;x++) {
+                this.rooms.push(new Room(x+1));
+                this.rooms[x-1].exits.push(this.rooms[x].ID);
+                this.rooms[x].exits.push(this.rooms[x-1].ID);
+            }
+            if (nrOfRooms != 2) {
+                this.rooms[0].exits.push(nrOfRooms);
+                this.rooms[nrOfRooms-1].exits.push(1);
+            }
+        }
+    }
 
     generateRectangleWorld(nrOfRooms) {}
 
     generateBranchWorld(nrOfRooms) {}
 }
 
-let test = new Room(1);
+const test = new World('jeff', 'circle',5);
 
-console.log(test);
+console.log(test.rooms);
