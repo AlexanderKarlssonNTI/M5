@@ -1,0 +1,81 @@
+html {
+    background-color: rgb(124, 113, 218);
+}
+body {
+    background-color: rgb(62, 50, 162);
+    height: 80vh;
+    margin: 6vw;
+}
+
+@font-face {
+    font-family: 'commodore-64';
+    src: URL('font/Commodore-64-v6.3.TTF') format('woff');
+}
+
+button {
+    background-color: rgb(124, 113, 218);
+    color: rgb(62, 50, 162);
+    height: 5vw;
+    border-style: none;
+    margin: 0.7vw;
+    font-size: 3vw;
+}
+button:hover {
+    cursor: pointer;
+    background-color: rgb(138, 126, 241);
+}
+button:active {
+    background-color: rgb(145, 133, 253);
+}
+
+label {
+    color: rgb(124, 113, 218);
+    font-size: 3vw;
+    margin-left: 10vw;
+}
+input[type=number] {
+    background-color: rgb(124, 113, 218);
+    color: rgb(62, 50, 162);
+    border-style: none;
+    -moz-appearance: textfield;
+    appearance: textfield;
+    margin: 0;
+}
+
+.create {
+    color: rgb(124, 113, 218);
+    text-align: center;
+    padding-top: 1vh;
+    font-size: 5vw;
+}
+.type-selection-row {
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+}
+.type {
+    color:rgb(124, 113, 218);
+    margin-right: 11vw;
+    margin-left: 10vw;
+    font-size: 4vw;
+}
+
+.btn-circular {
+    width: 13vw;
+}
+.btn-rectangle {
+    width: 16vw;
+}
+.btn-branch {
+    width: 12vw;
+}
+.btn-generate {
+    width: 20vw;
+    height: 6.3vw;
+    font-size: 4.5vw;
+    justify-content: center;
+    display: flex;
+    margin: auto;
+    position: relative;
+    top: 8%;
+}
