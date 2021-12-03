@@ -84,19 +84,37 @@ class World {
         if (mainbranch == 1) {
             this.rooms.push(new Room(1));
         }
-        else if (length > 1) {
-            for (let y = 0; y < width; y++) {
-                this.rooms.push(new Room(length*y+1));
-                for (let x = 1; x < length;x++) {
-                    this.rooms.push(new Room(length*y+x+1));
-                    this.rooms[length*y+x-1].exits.push(this.rooms[length*y+x].ID);
-                    this.rooms[length*y+x].exits.push(this.rooms[length*y+x-1].ID);
+        else if (mainbranch > 1 && Math.floor(mainbranch*factor) < 5) {
+            this.rooms.push(roomGenerator(1));
+            for (let x = 1; x < mainbranch; x++) {
+                this.rooms.push(roomGenerator(x+1));
+                this.rooms[x-1].Exits.push(this.rooms[x].Id);
+                this.rooms[x].Exits.push(this.rooms[x-1].Id);
+            }
+        }
+        else if (Math.floor(mainbranch*factor) >= 5) {
+            this.rooms.push(new Room(1));
+            for (let x = 1; x < mainbranch;x++) {
+                this.rooms.push(new Room(x+1));
+                this.rooms[x-1].exits.push(this.rooms[x].ID);
+                this.rooms[x].exits.push(this.rooms[x-1].ID);
+            }
+            let childLength = Math.floor(mainbranch*factor);
+            let mainLength = this.rooms.length;
+            while (childLength > 5) {
+                this.rooms.push(new Room(mainLength+1));
+                for (let x = 1; x < childLength;x++) {
+                    this.rooms.push(new Room(mainLength+x+1));
+                    this.rooms[mainLength+x-1].exits.push(this.rooms[mainLength+x].ID);
+                    this.rooms[mainLength+x].exits.push(this.rooms[mainLength+x-1].ID);
                 }
+                mainLength = this.rooms.length;
+                childLength = Math.floor(childLength*factor);
             }
         }
     }
 }
 
-const test = new World('jeff', 'rectangle',2,5);
+const test = new World('jeff', 'branch',10,.8);
 
 console.log(test.rooms);
