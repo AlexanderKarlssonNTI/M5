@@ -1,4 +1,5 @@
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -6,26 +7,49 @@
     <link rel="stylesheet" href="path_OS.css">
     <title>Create world</title>
 </head>
+
 <body>
-    <h1 class="create">Create</h1>
-    <div class="type-selection-row">
-        <h2 class="type">Type:</h2>
-        <button class="btn-circular">Circular</button>
-        <button class="btn-rectangle">Rectangle</button>
-        <button class="btn-branch">Branch</button>
+    <div class="content">
+        <h1 class="create">Create</h1>
+        <div class="top-row">
+            <input type="text" id="remember-world-type" style="display: none" />
+            <h2 class="type">Type:</h2>
+            <button id="btn-circular">Circular</button>
+            <button id="btn-rectangle">Rectangle</button>
+            <button id="btn-branch">Branch</button>
+        </div>
+        <div class="middle-row">
+            <div class="controls">
+                <div class="configs">
+                    <div class="labels">
+                        <label>Width (in rooms):</label>
+                        <label data-require-world="rectangle">Total number of rooms:</label>
+                        <label data-require-world="branch">Branch factor (0-1):</label>
+                    </div>
+                    <div>
+                        <div>
+                            <input id="world-side-length" type="number" value="20" min="1" />
+                        </div>
+                        <div data-require-world="rectangle">
+                            <input id="world-number-of-rooms" type="number" value="60" min="1" />
+                        </div>
+                        <div data-require-world="branch">
+                            <input id="world-branch-factor" type="number" value="0.7" min="0" max="1" step=".01" />
+                        </div>
+                    </div>
+                </div>
+                <button id="btn-generate">Generate</button>
+            </div>
+            <div class="preview-container">
+                <h3>Preview:</h3>
+                <div class="preview-display">
+                    <div id="row-container"></div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div>
-        <label>Width (in rooms):</label>
-        <input id="world-side-length" type="number" value="20" min="1" />
-    </div>
-    <div data-require-world="square">
-        <label>Total number of rooms:</label>
-        <input id="world-number-of-rooms" type="number" value ="60" min="1" />
-    </div>
-    <div data-require-world="branch">
-        <label>Branch factor (between 0 and 1):</label>
-        <input id="world-branch-factor" type="number" value="0.7" min="0" max="1" step=".01" />
-    </div>
-    <button class="btn-generate">Generate</button>
+    <script src="pathfinding.js"></script>
+    <script src="create.js"></script>
 </body>
+
 </html>
