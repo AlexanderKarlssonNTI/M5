@@ -150,7 +150,7 @@ input::-webkit-inner-spin-button {
 
     margin: 10px;
 }
-.middle-row > .controls {    
+.middle-row > .controls {
     display: flex;
     flex-direction: column;
     align-items: stretch;
