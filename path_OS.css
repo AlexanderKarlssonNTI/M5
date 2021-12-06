@@ -113,6 +113,8 @@ label {
     color: rgb(124, 113, 218);
     font-size: 2vw;
     margin-left: 10vw;
+    display: flex;
+    flex-direction: column;
 }
 input[type=number] {
     background-color: rgb(124, 113, 218);
@@ -216,7 +218,7 @@ input::-webkit-inner-spin-button {
     border-color: rgb(124, 113, 218);
 }
 .middle-row [data-require-world]:not(.enabled) {
-    opacity: 0.6;
+    display: none;
 }
 
 
@@ -327,4 +329,14 @@ input::-webkit-inner-spin-button {
     height: 120px;
     font-size: xx-large;
     font-family: 'Commodore-64';
+}
+
+#circle-inputs, #branch-inputs, #square-inputs{
+    display: flex;
+    flex-direction: row;
+}
+
+.world-inputs {
+    display: flex;
+    flex-direction: column;
 }

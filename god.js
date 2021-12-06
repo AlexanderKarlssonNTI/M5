@@ -3,17 +3,51 @@ class Room {
         this.name = this.Baptist();
         this.ID = id;
         this.exits = new Array;
+        this.canEnter = true;
     }
 
     Baptist() {
         const adj = ["bloody","bleak","dark","clean","dirty","cozy","heavenly","hellish","beautiful","neverending", "holy", "lovely","empty"];
         const plc = ["hallway","room","corridor","toilet","kitchen","basement","bedroom", "dining room","garden","chapel","dining hall","bathroom"];
-        const dsc = ["death","despair","hopelessnes","healing","horror","happines","joy","bliss", "buisness","love","sin","virtue","hope"];
+        const dsc = ["death","despair","hopelessnes","healing","horror","happines","joy","bliss", "buisness","love","sin","virtue","hope","corruption"];
         let word1 = adj[Math.floor(Math.random() * adj.length)];
         let word2 = plc[Math.floor(Math.random() * plc.length)];
         let word3 = dsc[Math.floor(Math.random() * dsc.length)];
         let fullName = "A "+word1+" "+word2+" of "+word3;
         return fullName;
+    }
+    
+    removeExitTo(room) {
+        if (room === null || room === undefined) return false;
+
+        const index = this.exits.indexOf(room.id);
+        if (index > -1) {
+            this.exits.splice(index, 1);
+            return true;
+        } else {
+            return false;
+        }
+    }
+    addExitTo(room) {
+        if (room === null || room === undefined) return false;
+        if (!this.canEnter || !room.canEnter) return false;
+
+        if (this.exits.includes(room.id)) {
+            // Already have exit:
+            return false;
+        }
+        this.exits.push(room.id);
+        return true;
+    }
+    connectTo(room) {
+        if (!room) return;
+        this.addExitTo(room);
+        room.addExitTo(this);
+    }
+    disconnectFrom(room) {
+        if (!room) return;
+        this.removeExitTo(room);
+        room.removeExitTo(this);
     }
 }
 
@@ -22,6 +56,7 @@ class World {
         this.name = Name;
         this.type = Type;
         this.rooms = new Array;
+        this.sideLength;
         switch(Type) {
             case "circle":
                 this.generateCircleWorld(parameter1);
@@ -57,8 +92,10 @@ class World {
     generateRectangleWorld(length, width) {
         if (length == 1) {
             this.rooms.push(new Room(1));
+            this.sideLength = length;
         }
         else if (length > 1) {
+            this.sideLength = length;
             this.rooms.push(new Room(1));
             for (let x = 1; x < length;x++) {
                 this.rooms.push(new Room(x+1));
@@ -83,8 +120,10 @@ class World {
     generateBranchWorld(mainbranch,factor) {
         if (mainbranch == 1) {
             this.rooms.push(new Room(1));
+            this.sideLength = mainbranch;
         }
         else if (mainbranch > 1 && Math.floor(mainbranch*factor) < 5) {
+            this.sideLength = mainbranch;
             this.rooms.push(roomGenerator(1));
             for (let x = 1; x < mainbranch; x++) {
                 this.rooms.push(roomGenerator(x+1));
@@ -93,6 +132,7 @@ class World {
             }
         }
         else if (Math.floor(mainbranch*factor) >= 5) {
+            this.sideLength = mainbranch;
             this.rooms.push(new Room(1));
             for (let x = 1; x < mainbranch;x++) {
                 this.rooms.push(new Room(x+1));

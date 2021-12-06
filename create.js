@@ -1,6 +1,6 @@
 
 const buttons = {
-    circular: document.getElementById('btn-circular'),
+    circle: document.getElementById('btn-circular'),
     rectangle: document.getElementById('btn-rectangle'),
     branch: document.getElementById('btn-branch'),
     generate: document.getElementById('btn-generate'),
@@ -10,11 +10,13 @@ const rememberWorldType = document.getElementById('remember-world-type');
 
 
 const lengthConfig = document.getElementById('world-side-length');
+const widthConfig = document.getElementById('world-side-width');
 const numberOfRoomsConfig = document.getElementById('world-number-of-rooms');
+const startLengthConfig = document.getElementById('world-start-length');
 const branchFactorConfig = document.getElementById('world-branch-factor');
 
 
-let wantedWorldType = 'circular';
+let wantedWorldType = 'circle';
 if (Object.keys(buttons).includes(rememberWorldType.value)) {
     // Remember world type between reloads (just like other config values):
     wantedWorldType = rememberWorldType.value;
@@ -36,33 +38,32 @@ onWorldTypeChanged();
 let currentWorld;
 let updateCurrentUi = function() {};
 const generateWorld = function () {
-    const world = new WorldBuilder();
-    world.nrOfRooms = parseInt(numberOfRoomsConfig.value);
-    world.sideLength = parseInt(lengthConfig.value);
-    world.branchFactor = parseFloat(branchFactorConfig.value);
-    if (isNaN(world.nrOfRooms) || isNaN(world.sideLength) || isNaN(world.branchFactor)) {
+    let world;
+    if (isNaN(branchFactorConfig) || isNaN(numberOfRoomsConfig) || isNaN(lengthConfig) || isNaN(startLengthConfig) || isNaN(widthConfig)) {
         return;
     }
-    if (wantedWorldType === 'circular' && world.sideLength === 0 || wantedWorldType === 'rectangle' && world.nrOfRooms === 0 || world.sideLength === 0 || wantedWorldType === 'branch' && world.branchFactor === 0 || world.sideLength === 0) {
+    if (wantedWorldType === 'circle' && world.sideLength === 0 || wantedWorldType === 'rectangle' && world.nrOfRooms === 0 || world.sideLength === 0 || wantedWorldType === 'branch' && world.branchFactor === 0 || world.sideLength === 0) {
         buttons.generate.disabled = true;
         showWorld(0);
     }
 
-    if (wantedWorldType != 'circular' && world.sideLength != 0 || wantedWorldType != 'rectangle' && world.nrOfRooms != 0 || world.sideLength != 0 || wantedWorldType != 'branch' && world.branchFactor != 0 || world.sideLength != 0) {
+    if (wantedWorldType != 'circle' && world.sideLength != 0 || wantedWorldType != 'rectangle' && world.nrOfRooms != 0 || world.sideLength != 0 || wantedWorldType != 'branch' && world.branchFactor != 0 || world.sideLength != 0) {
         buttons.generate.disabled = false;
     }
 
-    let createdWorld = null;
+    let createdWorld;
     switch (wantedWorldType) {
-        case 'circular':
-            world.nrOfRooms = world.sideLength;
-            createdWorld = world.generateStringWorld();
+        case 'circle':
+            world = new World('',wantedWorldType, parseInt(numberOfRoomsConfig.value),0);
+            createdWorld = world;
             break;
         case 'rectangle':
-            createdWorld = world.generateSquareWorld();
+            world = new World('',wantedWorldType, parseInt(lengthConfig.value),parseInt(widthConfig.value));
+            createdWorld = world;
             break;
         case 'branch':
-            createdWorld = world.generateBranchedWorld(world.sideLength);
+            world = new World('',wantedWorldType, parseInt(startLengthConfig.value),parseFloat(branchFactorConfig.value));
+            createdWorld = world;
             break;
     }
     if (createdWorld !== null) {
@@ -102,10 +103,11 @@ for (const [key, value] of Object.entries(buttons)) {
     };
 }
 
-lengthConfig.oninput = queueUpdate;
-branchFactorConfig.oninput = queueUpdate;
 numberOfRoomsConfig.oninput = queueUpdate;
-
+lengthConfig.oninput = queueUpdate;
+widthConfig.oninput = queueUpdate;
+startLengthConfig.oninput = queueUpdate;
+branchFactorConfig.oninput = queueUpdate;
 
 const preview = document.getElementById('row-container');
 preview.addEventListener('click', function (e) {
