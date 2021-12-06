@@ -39,9 +39,11 @@ input, textarea, button {
 @font-face {
     font-family: 'Commodore-64';
     src: url('font/C64_Pro-STYLE.ttf') format('woff2');
+}
 
+@font-face {
     font-family: 'C64Mono';
-    src: url('font/C64_Pro_Mono-STYLE.ttf') format('woff2');
+    src: url('font/C64_Pro_Mono-STYLE.ttf') format('woff2')
 }
 
 
@@ -290,6 +292,7 @@ input::-webkit-inner-spin-button {
     flex-direction: column;
     justify-content: center;
     font-size: small;
+    overflow: none;
 }
 
 .logo p {
@@ -302,6 +305,7 @@ input::-webkit-inner-spin-button {
     flex-direction: row;
     justify-content: center;
     gap: 20px;
+    overflow: none;
 }
 
 .letter {

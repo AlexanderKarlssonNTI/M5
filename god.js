@@ -114,7 +114,3 @@ class World {
         }
     }
 }
-
-const test = new World('jeff', 'branch',10,.8);
-
-console.log(test.rooms);
