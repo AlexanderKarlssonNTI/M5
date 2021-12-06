@@ -39,7 +39,11 @@ input, textarea, button {
 @font-face {
     font-family: 'Commodore-64';
     src: url('font/C64_Pro-STYLE.ttf') format('woff2');
+
+    font-family: 'C64Mono';
+    src: url('font/C64_Pro_Mono-STYLE.ttf') format('woff2');
 }
+
 
 * {
     scrollbar-width: thin;
@@ -279,4 +283,44 @@ input::-webkit-inner-spin-button {
 .spacer::after,
 .spacer-room::after {
     transition: 0.2s;
+}
+
+.logo {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    font-size: small;
+}
+
+.logo p {
+    margin: 0;
+    font-family: 'C64Mono';
+}
+
+.word {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 20px;
+}
+
+.letter {
+    word-wrap: none;
+}
+
+.menu-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-end;
+    height: 100%;
+    gap: 100px;
+    margin-bottom: 80px;
+}
+
+.menu-btn {
+    width: 220px;
+    height: 120px;
+    font-size: xx-large;
+    font-family: 'Commodore-64';
 }
