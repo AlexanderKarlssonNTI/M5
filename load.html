@@ -6,16 +6,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="path_OS.css">
     <style>
+        /*Overwrites CSS rules on this web page for "top-row", "middle-row" and "label"*/
         .top-row {
             border-top-style: dashed;
             border-color: rgb(124, 113, 218);
-            justify-content: space-around;
+            justify-content: end;
             margin-left: 10px;
             margin-right: 10px;
+            padding-top: 1vh;
         }
         .middle-row {
             border-bottom-style: dashed;
             border-color: rgb(124, 113, 218);
+        }
+        label {
+            margin-left: 0;
+        }
+
+        /*Implements a few more CSS rules for aligning the page*/
+        .name-data-label {
+            margin-right: 27vw;
+        }
+        .type-data-label {
+            margin-right: 5vw;
+        }
+        .world-data-column {
+            width: 52.5vw;
+            flex-direction: column;
+            display: flex;
+            text-align: center;
+            border-right-style: solid;
+            border-color: rgb(124, 113, 218);
+        }
+        .type-data {
+            width: 16vw;
+        }
+        .room-amount-data {
+            width: 18.5vw;
         }
     </style>
     <title>Load world</title>
@@ -25,19 +52,24 @@
     <div class="content">
         <h1 class="create">Load</h1>
         <div class="top-row">
-            <label>Name</label>
-            <label>Type</label>
+            <label class="name-data-label">Name</label>
+            <label class="type-data-label">Type</label>
             <label># of rooms</label>
         </div>
         <div class="middle-row">
-            <div>
-                <label>Name here</label>
+            <div class="world-data-column">
+                <label>A great sample of doom</label>
+                <label>A long example of something</label>
             </div>
-            <div>
-                <label>Type here</label>
+            <div class="world-data-column type-data">
+                <label>Circular</label>
+                <label>Branch</label>
+                <label>Rectangle</label>
             </div>
-            <div>
-                <label>(number)</label>
+            <div class="world-data-column room-amount-data">
+                <label>1234</label>
+                <label>23410</label>
+                <label>341200</label>
             </div>
         </div>
         <button id="btn-generate">Load</button>
