@@ -2,8 +2,7 @@
 const buttons = {
     circle: document.getElementById('btn-circular'),
     rectangle: document.getElementById('btn-rectangle'),
-    branch: document.getElementById('btn-branch'),
-    generate: document.getElementById('btn-generate'),
+    branch: document.getElementById('btn-branch')
 };
 const optionalSections = document.querySelectorAll('[data-require-world]');
 const rememberWorldType = document.getElementById('remember-world-type');
@@ -39,30 +38,31 @@ let currentWorld;
 let updateCurrentUi = function() {};
 const generateWorld = function () {
     let world;
-    if (isNaN(branchFactorConfig) || isNaN(numberOfRoomsConfig) || isNaN(lengthConfig) || isNaN(startLengthConfig) || isNaN(widthConfig)) {
+    if (isNaN(branchFactorConfig.value) || isNaN(numberOfRoomsConfig.value) || isNaN(lengthConfig.value) || isNaN(startLengthConfig.value) || isNaN(widthConfig.value)) {
         return;
     }
-    if (wantedWorldType === 'circle' && world.sideLength === 0 || wantedWorldType === 'rectangle' && world.nrOfRooms === 0 || world.sideLength === 0 || wantedWorldType === 'branch' && world.branchFactor === 0 || world.sideLength === 0) {
-        buttons.generate.disabled = true;
+    const generate = document.getElementById("btn-generate");
+    if (wantedWorldType === 'circle' && numberOfRoomsConfig.value === 0 || wantedWorldType === 'rectangle' && lengthConfig.value === 0 || widthConfig.value === 0 || wantedWorldType === 'branch' && branchFactorConfig.value === 0 || startLengthConfig.value === 0) {
+        generate.disabled = true;
         showWorld(0);
     }
 
-    if (wantedWorldType != 'circle' && world.sideLength != 0 || wantedWorldType != 'rectangle' && world.nrOfRooms != 0 || world.sideLength != 0 || wantedWorldType != 'branch' && world.branchFactor != 0 || world.sideLength != 0) {
-        buttons.generate.disabled = false;
+    if (wantedWorldType != 'circle' && numberOfRoomsConfig.value != 0 || wantedWorldType != 'rectangle' && lengthConfig.value != 0 || widthConfig.value != 0 || wantedWorldType != 'branch' && branchFactorConfig.value != 0 || startLengthConfig.value != 0) {
+        generate.disabled = false;
     }
 
     let createdWorld;
     switch (wantedWorldType) {
         case 'circle':
-            world = new World('',wantedWorldType, parseInt(numberOfRoomsConfig.value),0);
+            world = new World('','circle', parseInt(numberOfRoomsConfig.value),0);
             createdWorld = world;
             break;
         case 'rectangle':
-            world = new World('',wantedWorldType, parseInt(lengthConfig.value),parseInt(widthConfig.value));
+            world = new World('','rectangle', parseInt(lengthConfig.value),parseInt(widthConfig.value));
             createdWorld = world;
             break;
         case 'branch':
-            world = new World('',wantedWorldType, parseInt(startLengthConfig.value),parseFloat(branchFactorConfig.value));
+            world = new World('','branch', parseInt(startLengthConfig.value),parseFloat(branchFactorConfig.value));
             createdWorld = world;
             break;
     }
@@ -71,8 +71,8 @@ const generateWorld = function () {
         currentWorld = createdWorld;
     }
 };
-generateWorld();
 
+document.getElementById("preview-btn").addEventListener('click', generateWorld);
 
 // Ensure we don't spam updates (might cause performance issues)
 let timeoutId = null;
@@ -103,21 +103,26 @@ for (const [key, value] of Object.entries(buttons)) {
     };
 }
 
-numberOfRoomsConfig.oninput = queueUpdate;
-lengthConfig.oninput = queueUpdate;
-widthConfig.oninput = queueUpdate;
-startLengthConfig.oninput = queueUpdate;
-branchFactorConfig.oninput = queueUpdate;
+// numberOfRoomsConfig.oninput = queueUpdate;
+// lengthConfig.oninput = queueUpdate;
+// widthConfig.oninput = queueUpdate;
+// startLengthConfig.oninput = queueUpdate;
+// branchFactorConfig.oninput = queueUpdate;
 
 const preview = document.getElementById('row-container');
-preview.addEventListener('click', function (e) {
-    const roomId = e.target.getAttribute('data-room-id');
-
-    if (roomId === undefined || roomId === null) return;
-
-    const room = currentWorld.rooms[roomId - 1];
-    room.canEnter = !room.canEnter;
-    // Allow connecting "circular" rooms that wrap around the map
-    room.connectTo(currentWorld.wrappingRoomRightOf(room));
-    updateCurrentUi();
-});
+// preview.addEventListener('click', function (e) {
+//     console.log("Preparing preview");
+//     const roomId = e.target.getAttribute('data-room-id');
+//     console.log(roomId);
+//     if (roomId === undefined || roomId === null) {
+//         console.log("room ID invalid");
+//         return;
+//     }
+//     console.log("Room id valid");
+//     const room = currentWorld.rooms[roomId - 1];
+//     // room.canEnter = !room.canEnter;
+//     // Allow connecting "circular" rooms that wrap around the map
+//     console.log("Preview done");
+//     updateCurrentUi();
+//     console.log("Updating");
+// });

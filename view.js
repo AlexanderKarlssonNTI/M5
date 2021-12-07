@@ -1,86 +1,20 @@
-// class World {
-//     constructor() {
-//         this.name = '';
-//         this.rooms = [];
-//         this.sideLength = 4;
-//     }
-
-//     wrappingRoomLeftOf(room) {
-//         let id = room.id - 1;
-//         if ((room.id % this.sideLength) == 1) {
-//             // First room
-//             id = room.id + this.sideLength - 1;
-//             if (id > this.rooms.length) {
-//                 return null;
-//             }
-//         }
-//         return this.rooms[id - 1];
-//     }
-//     wrappingRoomRightOf(room) {
-//         let id = room.id + 1;
-//         if ((room.id % this.sideLength) == 0) {
-//             // last room
-//             id = room.id - this.sideLength + 1;
-//             if (id <= 0) {
-//                 return null;
-//             }
-//         }
-//         return this.rooms[id - 1];
-//     }
-//     roomLeftOf(room) {
-//         const id = room.id - 1;
-//         if ((room.id % this.sideLength) == 1) {
-//             // First room
-//             return null;
-//         }
-//         return this.rooms[id - 1];
-//     }
-//     roomRightOf(room) {
-//         const id = room.id + 1;
-//         if ((room.id % this.sideLength) == 0) {
-//             // last room
-//             return null;
-//         }
-//         return this.rooms[id - 1];
-//     }
-//     roomAboveOf(room) {
-//         const id = room.id - this.sideLength;
-//         if (id <= 0) {
-//             return null;
-//         }
-//         return this.rooms[id - 1];
-//     }
-//     roomBelowOf(room) {
-//         const id = room.id + this.sideLength;
-//         if (id > this.rooms.length) {
-//             return null;
-//         }
-//         return this.rooms[id - 1];
-//     }
-
-//     blockRoom(room) {
-//         if (!room) return;
-//         room.disconnectFrom(this.roomAboveOf(room));
-//         room.disconnectFrom(this.roomBelowOf(room));
-//         room.disconnectFrom(this.roomLeftOf(room));
-//         room.disconnectFrom(this.roomRightOf(room));
-//         room.canEnter = false;
-//     }
-// }
 
 
 function showWorld(world) {
+    console.log("Kilroy was here!");
     const rowContainer = document.getElementById('row-container');
     // Remove all child elements in row container (from previous show world calls):
     rowContainer.innerHTML = '';
     const updateFunctions = [];
 
+    console.log("Start");
     const totalRows = world.rooms.length / world.sideLength;
     for (let row = 0; row < totalRows; row++) {
         // Spacer before each row:
+        
         const rowSpacerBefore = document.createElement('div');
         rowSpacerBefore.classList.add('spacer');
-
+        
         // Create a div tag for each row:
         const rowDiv = document.createElement('div');
         rowDiv.classList.add('row');
@@ -97,13 +31,11 @@ function showWorld(world) {
             const spacerAbove = document.createElement('div');
             spacerAbove.classList.add('spacer-room');
 
-
             const spacerBefore = document.createElement('div');
             spacerBefore.classList.add('spacer');
-
+            
             const spacerAfter = document.createElement('div');
             spacerAfter.classList.add('spacer');
-
 
             // Create a div tag for each room:
             const roomDiv = document.createElement('div');
@@ -112,6 +44,7 @@ function showWorld(world) {
             const roomIndex = row * world.sideLength + i;
             if (roomIndex < world.rooms.length) {
                 const room = world.rooms[roomIndex];
+                console.log(room);
                 for (const element of [roomDiv, spacerBefore, spacerAfter, spacerAbove, spacerBelow]) {
                     element.setAttribute('data-room-id', room.ID);
                 }
@@ -187,6 +120,7 @@ function showWorld(world) {
         rowContainer.appendChild(rowSpacerAfter);
     }
 
+    console.log("Show world done");
     // Return a function that updates the UI when called:
     return function () {
         for (const updateFunction of updateFunctions) {

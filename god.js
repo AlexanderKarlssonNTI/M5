@@ -17,6 +17,11 @@ class Room {
         return fullName;
     }
     
+    hasExitTo(room) {
+        if (room === null || room == undefined) return false;
+        if (!this.canEnter || !room.canEnter) return false;
+        return this.exits.includes(room.ID);
+    }
     removeExitTo(room) {
         if (room === null || room === undefined) return false;
 
@@ -56,7 +61,7 @@ class World {
         this.name = Name;
         this.type = Type;
         this.rooms = new Array;
-        this.sideLength;
+        this.sideLength = new Number;
         switch(Type) {
             case "circle":
                 this.generateCircleWorld(parameter1);
@@ -74,9 +79,11 @@ class World {
     generateCircleWorld(nrOfRooms) {
         if (nrOfRooms == 1) {
             this.rooms.push(new Room(1));
+            this.sideLength = 1;
         }
         else if (nrOfRooms > 1) {
             this.rooms.push(new Room(1));
+            this.sideLength = nrOfRooms;
             for (let x = 1; x < nrOfRooms;x++) {
                 this.rooms.push(new Room(x+1));
                 this.rooms[x-1].exits.push(this.rooms[x].ID);
@@ -92,7 +99,7 @@ class World {
     generateRectangleWorld(length, width) {
         if (length == 1) {
             this.rooms.push(new Room(1));
-            this.sideLength = length;
+            this.sideLength = 1;
         }
         else if (length > 1) {
             this.sideLength = length;
@@ -152,5 +159,66 @@ class World {
                 childLength = Math.floor(childLength*factor);
             }
         }
+    }
+    wrappingRoomLeftOf(room) {
+        let id = room.id - 1;
+        if ((room.id % this.sideLength) == 1) {
+            // First room
+            id = room.id + this.sideLength - 1;
+            if (id > this.rooms.length) {
+                return null;
+            }
+        }
+        return this.rooms[id - 1];
+    }
+    wrappingRoomRightOf(room) {
+        let id = room.id + 1;
+        if ((room.id % this.sideLength) == 0) {
+            // last room
+            id = room.id - this.sideLength + 1;
+            if (id <= 0) {
+                return null;
+            }
+        }
+        return this.rooms[id - 1];
+    }
+    roomLeftOf(room) {
+        const id = room.id - 1;
+        if ((room.id % this.sideLength) == 1) {
+            // First room
+            return null;
+        }
+        return this.rooms[id - 1];
+    }
+    roomRightOf(room) {
+        const id = room.id + 1;
+        if ((room.id % this.sideLength) == 0) {
+            // last room
+            return null;
+        }
+        return this.rooms[id - 1];
+    }
+    roomAboveOf(room) {
+        const id = room.id - this.sideLength;
+        if (id <= 0) {
+            return null;
+        }
+        return this.rooms[id - 1];
+    }
+    roomBelowOf(room) {
+        const id = room.id + this.sideLength;
+        if (id > this.rooms.length) {
+            return null;
+        }
+        return this.rooms[id - 1];
+    }
+
+    blockRoom(room) {
+        if (!room) return;
+        room.disconnectFrom(this.roomAboveOf(room));
+        room.disconnectFrom(this.roomBelowOf(room));
+        room.disconnectFrom(this.roomLeftOf(room));
+        room.disconnectFrom(this.roomRightOf(room));
+        room.canEnter = false;
     }
 }

@@ -27,7 +27,7 @@
                                 <label data-require-world="circle" for="world-number-of-rooms">Total number of rooms:</label>
                             </div>
                             <div class="world-inputs">
-                                <input data-require-world="circle" id="world-number-of-rooms" type="number" min="1" />
+                                <input data-require-world="circle" id="world-number-of-rooms" type="number" min="1"/>
                             </div>
                         </div>
                         <div data-require-world="rectangle" id="square-inputs">
@@ -36,8 +36,8 @@
                                 <label data-require-world="rectangle" for="world-side-width">Width:</label> 
                             </div>
                             <div class="world-inputs">
-                                <input data-require-world="rectangle" id="world-side-length" type="number" min="1" />
-                                <input data-require-world="rectangle" id="world-side-width" type="number" min="1" />
+                                <input data-require-world="rectangle" id="world-side-length" type="number" min="1"/>
+                                <input data-require-world="rectangle" id="world-side-width" type="number" min="1"/>
                             </div>
                         </div>
                         <div data-require-world="branch" id="branch-inputs">
@@ -46,8 +46,8 @@
                                 <label data-require-world="branch" for="world-branch-factor">Branch factor (0-1):</label>
                             </div>
                             <div class="world-inputs">
-                                <input data-require-world="branch" id="world-start-length" type="number" min="0" max="1" step=".01" />
-                                <input data-require-world="branch" id="world-branch-factor" type="number" min="0" max="1" step=".01" />
+                                <input data-require-world="branch" id="world-start-length" type="number" min="1"/>
+                                <input data-require-world="branch" id="world-branch-factor" type="number" min="0" max="1" step=".01">
                             </div>
                         </div>
                     </div>
@@ -59,12 +59,13 @@
                 <div class="preview-display">
                     <div id="row-container"></div>
                 </div>
+                <button id="preview-btn">Preview</button>
             </div>
         </div>
     </div>
-    <script src="god.js"></script>
-    <script src="pathfinding.js"></script>
-    <script src="create.js"></script>
+    <script type="text/javascript" src="god.js"></script>
+    <script type="text/javascript" src="view.js"></script>
+    <script type="text/javascript" src="create.js"></script>
 </body>
 
 </html>
