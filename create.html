@@ -14,27 +14,41 @@
         <div class="top-row">
             <input type="text" id="remember-world-type" style="display: none" />
             <h2 class="type">Type:</h2>
-            <button id="btn-circular">Circular</button>
+            <button id="btn-circular">Circle</button>
             <button id="btn-rectangle">Rectangle</button>
             <button id="btn-branch">Branch</button>
         </div>
         <div class="middle-row">
             <div class="controls">
                 <div class="configs">
-                    <div class="labels">
-                        <label>Width (in rooms):</label>
-                        <label data-require-world="rectangle">Total number of rooms:</label>
-                        <label data-require-world="branch">Branch factor (0-1):</label>
-                    </div>
                     <div>
-                        <div>
-                            <input id="world-side-length" type="number" value="20" min="1" />
+                        <div data-require-world="circle" id="circle-inputs"style>
+                            <div class="labels">
+                                <label data-require-world="circle" for="world-number-of-rooms">Total number of rooms:</label>
+                            </div>
+                            <div class="world-inputs">
+                                <input data-require-world="circle" id="world-number-of-rooms" type="number" min="1" />
+                            </div>
                         </div>
-                        <div data-require-world="rectangle">
-                            <input id="world-number-of-rooms" type="number" value="60" min="1" />
+                        <div data-require-world="rectangle" id="square-inputs">
+                            <div class="labels">
+                                <label data-require-world="rectangle" for="world-side-length">Length:</label>
+                                <label data-require-world="rectangle" for="world-side-width">Width:</label> 
+                            </div>
+                            <div class="world-inputs">
+                                <input data-require-world="rectangle" id="world-side-length" type="number" min="1" />
+                                <input data-require-world="rectangle" id="world-side-width" type="number" min="1" />
+                            </div>
                         </div>
-                        <div data-require-world="branch">
-                            <input id="world-branch-factor" type="number" value="0.7" min="0" max="1" step=".01" />
+                        <div data-require-world="branch" id="branch-inputs">
+                            <div class="labels">
+                                <label data-require-world="branch" for="world-start-length">Start length:</label>
+                                <label data-require-world="branch" for="world-branch-factor">Branch factor (0-1):</label>
+                            </div>
+                            <div class="world-inputs">
+                                <input data-require-world="branch" id="world-start-length" type="number" min="0" max="1" step=".01" />
+                                <input data-require-world="branch" id="world-branch-factor" type="number" min="0" max="1" step=".01" />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -48,6 +62,7 @@
             </div>
         </div>
     </div>
+    <script src="god.js"></script>
     <script src="pathfinding.js"></script>
     <script src="create.js"></script>
 </body>
