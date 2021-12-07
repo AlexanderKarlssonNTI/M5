@@ -109,20 +109,3 @@ for (const [key, value] of Object.entries(buttons)) {
 // startLengthConfig.oninput = queueUpdate;
 // branchFactorConfig.oninput = queueUpdate;
 
-const preview = document.getElementById('row-container');
-// preview.addEventListener('click', function (e) {
-//     console.log("Preparing preview");
-//     const roomId = e.target.getAttribute('data-room-id');
-//     console.log(roomId);
-//     if (roomId === undefined || roomId === null) {
-//         console.log("room ID invalid");
-//         return;
-//     }
-//     console.log("Room id valid");
-//     const room = currentWorld.rooms[roomId - 1];
-//     // room.canEnter = !room.canEnter;
-//     // Allow connecting "circular" rooms that wrap around the map
-//     console.log("Preview done");
-//     updateCurrentUi();
-//     console.log("Updating");
-// });

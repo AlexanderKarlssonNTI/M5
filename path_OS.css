@@ -75,10 +75,10 @@ button {
     padding-left: 1vw;
     font-size: 2.3vw;
 }
-button:hover {
+/* button:hover {
     cursor: pointer;
     background-color: rgb(138, 126, 241);
-}
+} */
 button:active {
     background-color: rgb(145, 133, 253);
 }
