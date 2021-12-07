@@ -27,10 +27,10 @@ function showWorld(world) {
     const totalRows = world.rooms.length / world.sideLength;
     for (let row = 0; row < totalRows; row++) {
         // Spacer before each row:
-        
+
         const rowSpacerBefore = document.createElement('div');
         rowSpacerBefore.classList.add('spacer');
-        
+
         // Create a div tag for each row:
         const rowDiv = document.createElement('div');
         rowDiv.classList.add('row');
@@ -49,7 +49,7 @@ function showWorld(world) {
 
             const spacerBefore = document.createElement('div');
             spacerBefore.classList.add('spacer');
-            
+
             const spacerAfter = document.createElement('div');
             spacerAfter.classList.add('spacer');
 
