@@ -4,14 +4,15 @@ preview.addEventListener('click', function (e) {
     const roomId = e.target.getAttribute('data-room-id');
     console.log(roomId);
     if (roomId === undefined || roomId === null) {
-        console.log("room ID invalid");
+        console.log("room ID invalid, didn't click on a room");
         return;
     }
     console.log("Room id valid");
     const room = currentWorld.rooms[roomId - 1];
+
     room.canEnter = !room.canEnter;
-    // Allow connecting "circular" rooms that wrap around the map
     console.log("Preview done");
+
     updateCurrentUi();
     console.log("Updating");
 });
@@ -68,12 +69,12 @@ function showWorld(world) {
                 const updateRoom = function () {
                     roomDiv.classList.toggle('blocked', !room.canEnter);
                     {
-                        const roomLeftOf = room.hasExitTo(world.wrappingRoomLeftOf(room));
+                        let roomLeftOf = room.hasExitTo(world.sideLength <= 2 ? world.roomLeftOf(room) : world.wrappingRoomLeftOf(room));
                         roomDiv.classList.toggle('path-to-left', roomLeftOf);
                         spacerBefore.classList.toggle('has-path', roomLeftOf);
                     }
                     {
-                        const roomRightOf = room.hasExitTo(world.wrappingRoomRightOf(room));
+                        let roomRightOf = room.hasExitTo(world.sideLength <= 2 ? world.roomRightOf(room) : world.wrappingRoomRightOf(room));
                         roomDiv.classList.toggle('path-to-right', roomRightOf);
                         spacerAfter.classList.toggle('has-path', roomRightOf);
                     }
