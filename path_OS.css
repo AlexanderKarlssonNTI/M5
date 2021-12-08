@@ -1,5 +1,6 @@
+/*Swaped html and body background color to substantially increase contrast with black text*/
 html {
-    background-color: rgb(124, 113, 218);
+    background-color: rgb(62, 50, 162);
     display: flex;
     flex-direction: column;
     align-content: stretch;
@@ -10,7 +11,7 @@ html {
 body {
     flex: 1;
 
-    background-color: rgb(62, 50, 162);
+    background-color: rgb(124, 113, 218);
     margin: 6vw;
     margin-top: 10vh;
     margin-bottom: 10vh;
@@ -115,17 +116,14 @@ label {
     flex-direction: column;
 }
 input[type=number] {
-    background-color: rgb(124, 113, 218);
-    color: rgb(62, 50, 162);
+    color: rgb(124, 113, 218);
+    background-color: rgb(62, 50, 162);
     border-style: none;
     appearance: textfield;
+    outline: none;
     margin: 0.5vw;
     width: 10vw;
     font-size: 1.3vw;
-}
-
-input {
-    outline: none;
 }
 
 input::-webkit-outer-spin-button,
@@ -172,7 +170,7 @@ input::-webkit-inner-spin-button {
     flex: 1;
 
     display: flex;
-    flex-flow: row;
+    flex-direction: column;
     align-items: flex-start;
 }
 .middle-row > .controls > .configs > .labels {
@@ -219,12 +217,13 @@ input::-webkit-inner-spin-button {
     flex-direction: column;
     align-items: stretch;
     border-style: solid;
-    border-color: rgb(124, 113, 218);
+    border-color: rgb(62, 50, 162);
     background-color: #FFFFFF;
     border-width: 8px;
 }
 .middle-row [data-require-world]:not(.enabled) {
-    display: none;
+    visibility: hidden;
+    max-height: 0;
 }
 
 
@@ -245,22 +244,26 @@ input::-webkit-inner-spin-button {
 }
 .row > .room {
     background-color: #6F4F25;
-    max-width: 14px;
 }
 .row > .room.blocked {
     background-color: #433900;
 }
+#row-container > .spacer > .spacer-room,
+.row > .room {
+    max-width: 14px;
+}
 /* Horizontal path */
 .row > .spacer {
     display: flex;
-    align-items: center;
-    justify-content: stretch;
-    flex-direction: row;
+    align-items: stretch;
+    justify-content: space-around;
+    flex-direction: column;
 }
 .row > .spacer::after {
     content: "";
-    flex: 1;
-    height: 5px;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 5px;
     background-color: #444444;
     opacity: 0;
 }
@@ -270,14 +273,15 @@ input::-webkit-inner-spin-button {
 /* Vertical path */
 #row-container .spacer > .spacer-room {
     display: flex;
-    align-items: center;
-    justify-content: stretch;
-    flex-direction: column;
+    align-items: stretch;
+    justify-content: space-around;
+    flex-direction: row;
 }
 #row-container > .spacer > .spacer-room::after {
     content: "";
-    flex: 1;
-    width: 5px;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 5px;
     background-color: black;
     opacity: 0;
 }
@@ -293,6 +297,7 @@ input::-webkit-inner-spin-button {
 .spacer-room::after {
     transition: 0.2s;
 }
+/* End of preview */
 
 .logo {
     display: flex;
