@@ -219,7 +219,7 @@ input::-webkit-inner-spin-button {
     flex-direction: column;
     align-items: stretch;
     border-style: solid;
-    border-color: rgb(124, 113, 218);
+    border-color: #959595;
     background-color: #FFFFFF;
     border-width: 8px;
 }
@@ -300,6 +300,9 @@ input::-webkit-inner-spin-button {
     justify-content: center;
     font-size: small;
     overflow: none;
+    padding: 30px 0;
+    background-color: #6C6C6C;
+    gap: 10px;
 }
 
 .logo p {
