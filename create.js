@@ -100,7 +100,7 @@ for (const [key, value] of Object.entries(buttons)) {
     value.onclick = function () {
         wantedWorldType = key;
         onWorldTypeChanged();
-        queueUpdate();
+        // queueUpdate();
     };
 }
 

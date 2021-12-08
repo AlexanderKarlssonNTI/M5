@@ -1,4 +1,3 @@
-/*Swaped html and body background color to substantially increase contrast with black text*/
 html {
     background-color: rgb(124, 113, 218);
     display: flex;
@@ -360,10 +359,9 @@ input::-webkit-inner-spin-button {
     display: flex;
     flex-direction: row;
     justify-content: center;
-    align-items: flex-end;
+    align-items: center;
     height: 100%;
     gap: 100px;
-    margin-bottom: 80px;
 }
 
 .menu-btn {
