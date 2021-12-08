@@ -40,6 +40,7 @@ let updateCurrentUi = function() {};
 const generateWorld = function () {
     let world;
     if (isNaN(branchFactorConfig.value) || isNaN(numberOfRoomsConfig.value) || isNaN(lengthConfig.value) || isNaN(startLengthConfig.value) || isNaN(widthConfig.value)) {
+        console.log('NaNi!? Will not run invalid inputs');
         return;
     }
     const generate = document.getElementById("btn-generate");
@@ -110,3 +111,11 @@ for (const [key, value] of Object.entries(buttons)) {
 // widthConfig.oninput = queueUpdate;
 // startLengthConfig.oninput = queueUpdate;
 // branchFactorConfig.oninput = queueUpdate;
+
+function saveSpecifiedWorld() {
+    let data = new FormData();
+    data.append("data" , "the_text_you_want_to_save");
+    let xhr = (window.XMLHttpRequest) ? new XMLHttpRequest() : new activeXObject("Microsoft.XMLHTTP");
+    xhr.open( 'post', '/path/to/php', true );
+    xhr.send(data);
+}
