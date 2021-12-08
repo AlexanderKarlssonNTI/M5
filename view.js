@@ -145,3 +145,36 @@ function showWorld(world) {
     };
 }
 
+function SPF(world, startID, endID) {
+    if (startID > 0 && endID > 0 && startID < world.rooms.length && endID < world.rooms.length) {
+        let checking = [[startID]];
+        let solved = [];
+        while(checking.length>0) {
+            let newCheck = [];
+            for(path of checking) {
+                let lastroom = path[path.length-1];
+                let exits = world.rooms[lastroom-1].exits;
+                for(let i=0; i<exits.length; i++) {
+                    let temp = [];
+                    let exit = world.rooms[lastroom-1].exits[i];
+                    if(exit == endID) {
+                        temp = path.slice();
+                        temp.push(exit);
+                        solved.push(temp.slice());
+                    }
+                    else if(!path.includes(exit)) {
+                        temp = path.slice();
+                        temp.push(exit);
+                        newCheck.push(temp.slice());  
+                    }
+                }
+            }
+            checking = newCheck.slice();
+        }
+        console.log(solved);
+        return solved;
+    }
+    else {
+        console.log("Invalid parameter/s");
+    }
+}

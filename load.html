@@ -16,8 +16,10 @@
             padding-top: 1vh;
         }
         .middle-row {
-            border-bottom-style: dashed;
+            border-style: solid;
             border-color: rgb(124, 113, 218);
+            padding: 6px;
+            background-color: #959595;
         }
         label {
             margin-left: 0;
@@ -35,15 +37,15 @@
             flex-direction: column;
             display: flex;
             text-align: center;
-            border-right-style: solid;
+            border-right-style: dashed;
             border-color: rgb(124, 113, 218);
-            background-color: rgb(119, 119, 119);
         }
         .type-data {
-            width: 16vw;
+            width: 19vw;
         }
         .room-amount-data {
             width: 18.5vw;
+            border-style: none;
         }
     </style>
     <title>Path OS - Load</title>
@@ -75,8 +77,8 @@
             </div>
         </div>
         <div style="display: flex; flex-direction: row; justify-content: center;">
-            <button id="btn-generate" onclick="window.location.href='view.html'">Load</button>
-            <button id="btn-generate" onclick="window.location.href='index.html'">Back</button>
+            <button class="btn-back" onclick="window.location.href='view.html'">Load</button>
+            <button class="btn-back" onclick="window.location.href='index.html'">Back</button>
         </div>
         
     </div>
