@@ -100,13 +100,13 @@ for (const [key, value] of Object.entries(buttons)) {
     value.onclick = function () {
         wantedWorldType = key;
         onWorldTypeChanged();
+        // Updates preview as the world type is selected, not used due to design choice for only one button to queue updates
         // queueUpdate();
     };
 }
-
+// Updates preview as input is changed, not used due to design choice for only one button to queue updates
 // numberOfRoomsConfig.oninput = queueUpdate;
 // lengthConfig.oninput = queueUpdate;
 // widthConfig.oninput = queueUpdate;
 // startLengthConfig.oninput = queueUpdate;
 // branchFactorConfig.oninput = queueUpdate;
-
