@@ -102,12 +102,12 @@ button.selected {
 }
 #btn-generate {
     width: 24vw;
-    height: 5vw;
+    height: 9vh;
     font-size: 3vw;
     justify-content: center;
     display: flex;
     align-self: center;
-    padding-top: 0.7vw;
+    padding-top: 0.6vh;
 }
 
 label {
