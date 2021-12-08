@@ -13,7 +13,7 @@ class WorldController extends Controller
      */
     public function index()
     {
-        return view('index');
+        //
     }
 
     /**
@@ -23,7 +23,7 @@ class WorldController extends Controller
      */
     public function create()
     {
-        return view('create');
+        //
     }
 
     /**
@@ -32,16 +32,32 @@ class WorldController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, $worldId)
     {
         // Create world
         $world = new World;
         $world->title = $request->input('title');
         $world->type = $request->input('type');
-        $world->roomAmount = $request->input('room_amount');
+        $world->roomBranchFactor = $request->input('room_branch_factor');
+        $world->roomRowAmount = $request->input('room_row_amount');
+        $world->roomTotalAmount = $request->input('room_total_amount');
         $world->save();
 
-        return redirect('/view/{$roomID}');
+        // Create rooms of world
+        $room = new Room;
+        $room->title = $request->input('title');
+        $room->exits = $request->input('exits');
+        $room->enterable = $request->input('enterable');
+        $room->world_id = $worldId;
+        $room->save();
+
+        // Create room exits
+        $exits = new Exit;
+        $exits->room_id = $roomId;
+        $exits->has_exit_to_room_id = $hasExitToRoomId;
+        $exits->save();
+
+        return redirect('/view?{$roomID}');
     }
 
     /**

@@ -1,4 +1,3 @@
-
 const buttons = {
     circle: document.getElementById('btn-circular'),
     rectangle: document.getElementById('btn-rectangle'),
@@ -23,9 +22,11 @@ if (Object.keys(buttons).includes(rememberWorldType.value)) {
 function onWorldTypeChanged() {
     rememberWorldType.value = wantedWorldType;
 
+    // Highlight buttons:
     for (const [key, buttonElement] of Object.entries(buttons)) {
         buttonElement.classList.toggle('selected', key === wantedWorldType);
     }
+    // Hide/show sections/divs
     for (const section of optionalSections) {
         const enabled = section.getAttribute('data-require-world') === wantedWorldType;
         section.classList.toggle('enabled', enabled);
