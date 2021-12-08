@@ -17,24 +17,24 @@ class CreateWorldsTable extends Migration
             $table->id();
             $table->string('title');
             $table->string('type');
-            $table->unsignedInteger('room_branch_factor');
-            $table->unsignedInteger('room_row_amount');
             $table->unsignedInteger('room_total_amount');
+            $table->unsignedInteger('room_row_amount');
+            $table->unsignedInteger('room_branch_factor');
             $table->timestamps();
         });
 
         Schema::create('rooms', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->boolval('enterable');
-            $table->foreignId('world_id')->constrained()->cascadeOnDelete();
+            $table->boolean('enterable');
+            $table->foreignId('world_id');
         });
 
-        Schema::create('exits', function (Blueprint $table)) {
+        Schema::create('exits', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('room_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('has_exit_to_room_id')->constrained()->cascadeOnDelete();
-        }
+            $table->foreignId('room_id');
+            $table->foreignId('has_exit_to_room_id');
+        });
     }
 
     /**

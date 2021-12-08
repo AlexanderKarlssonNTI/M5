@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Exit extends Model
+class RoomExit extends Model
 {
     // Table name
     protected $table = 'exits';

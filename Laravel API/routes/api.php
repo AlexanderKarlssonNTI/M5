@@ -3,7 +3,6 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WorldController;
-use App\Http\Controllers\RoomController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -19,5 +18,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::resource("create", [WorldController::class, 'create']);
-Route::resource("load", [WorldController::class, 'load']);
+Route::post("create", [WorldController::class, 'store']);
+Route::get("load", [WorldController::class, 'load']);
