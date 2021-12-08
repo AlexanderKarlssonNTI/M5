@@ -32,7 +32,7 @@ body {
     overflow: auto;
     min-height: 100%;
 }
-input, textarea, button {
+input, textarea {
     font-family: inherit;
 }
 
@@ -67,6 +67,8 @@ input, textarea, button {
 }
 
 button {
+    font-family: "C64Mono";
+    text-align: center;
     background-color: #FFFFFF;
     border-width: 6px;
     border-style: solid;
@@ -95,19 +97,24 @@ button.selected {
     width: 17vw;
 }
 #btn-rectangle {
-    width: 20vw;
+    width: 23vw;
 }
 #btn-branch {
-    width: 15vw;
+    width: 17vw;
 }
 #btn-generate {
-    width: 24vw;
+    width: 26vw;
     height: 5vw;
     font-size: 3vw;
     justify-content: center;
     display: flex;
     align-self: center;
     padding-top: 0.7vw;
+}
+.btn-back {
+    width: 15vw;
+    height: 5vw;
+    font-size: 3vw;
 }
 
 label {
