@@ -138,7 +138,7 @@ input::-webkit-inner-spin-button {
     text-align: center;
     margin-top: 2vh;
     font-size: 3vw;
-    background-color: #959595;
+    /* background-color: #959595; */
     margin: 0;
     padding-top: 30px;
     padding-bottom: 30px;
@@ -233,10 +233,12 @@ input::-webkit-inner-spin-button {
     flex: 1 1 auto;
     align-self: stretch;
 
-    width: 0;
     padding: 10px;
-    max-height: 80%;
+    max-height: 70%;
+    min-height: 50%;
     overflow: auto;
+    width: auto;
+    height: auto;
 
     display: flex;
     flex-direction: column;
@@ -245,6 +247,8 @@ input::-webkit-inner-spin-button {
     border-color: #68372B;
     background-color: #9AD284;
     border-width: 8px;
+    margin-left: 8vw;
+    margin-right: 8vw;
 }
 
 /* Configure rows: */
@@ -302,7 +306,7 @@ input::-webkit-inner-spin-button {
     flex: 1 1 auto;
     min-width: 0;
     max-width: 5px;
-    background-color: black;
+    background-color: #444444;
     opacity: 0;
 }
 #row-container > .spacer > .spacer-room.has-path::after {
@@ -323,12 +327,16 @@ input::-webkit-inner-spin-button {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
     font-size: small;
     overflow: none;
-    padding: 6vh 0;
-    background-color: #6C6C6C;
+    /* background-color: #6C6C6C; */
     gap: 10px;
-    max-height: 60%;
+    height: 60%;
+    margin: 14px auto 0;
+    padding: 14px;
+    background-color: #FFFFFF;
+    border: 6px solid #000000;
 }
 
 .logo p {
@@ -379,7 +387,7 @@ input::-webkit-inner-spin-button {
     text-align: center;
     margin-top: 2vh;
     font-size: 3vw;
-    background-color: #959595;
+    /* background-color: #959595; */
     margin: 0;
     padding-top: 20px;
     padding-bottom: 20px;
@@ -388,4 +396,6 @@ input::-webkit-inner-spin-button {
 .nav-bar {
     display: flex;
     flex-direction: row;
+    justify-content: center;
+    flex: 1 1 auto;
 }

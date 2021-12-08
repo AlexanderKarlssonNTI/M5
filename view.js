@@ -18,7 +18,6 @@ preview.addEventListener('click', function (e) {
 });
 
 function showWorld(world) {
-    console.log("Kilroy was here!");
     const rowContainer = document.getElementById('row-container');
     // Remove all child elements in row container (from previous show world calls):
     rowContainer.innerHTML = '';
