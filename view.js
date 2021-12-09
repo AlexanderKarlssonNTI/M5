@@ -1,4 +1,4 @@
-const preview = document.getElementById('row-container-view');
+const preview = document.getElementById('row-container');
 preview.addEventListener('click', function (e) {
     console.log("Preparing preview");
     const roomId = e.target.getAttribute('data-room-id');
@@ -21,6 +21,9 @@ function showWorld(world) {
     const rowContainer = document.getElementById('row-container');
     // Remove all child elements in row container (from previous show world calls):
     rowContainer.innerHTML = '';
+    if (!world) {
+        return null;
+    }
     const updateFunctions = [];
 
     console.log("Start");
