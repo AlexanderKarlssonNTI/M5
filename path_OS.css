@@ -103,13 +103,14 @@ button.selected {
     width: 17vw;
 }
 #btn-generate {
-    width: 24vw;
+    width: 25vw;
     height: 9vh;
     font-size: 3vw;
     justify-content: center;
     display: flex;
     align-self: center;
     padding-top: 0.6vh;
+    padding-right: 0.9vw;
 }
 .btn-back {
     width: 15vw;
