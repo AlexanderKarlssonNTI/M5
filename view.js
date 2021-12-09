@@ -1,4 +1,4 @@
-const preview = document.getElementById('row-container');
+const preview = document.getElementById('row-container-view');
 preview.addEventListener('click', function (e) {
     console.log("Preparing preview");
     const roomId = e.target.getAttribute('data-room-id');
