@@ -3,11 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\World;
 
 class WorldController extends Controller
 {
-    public function store(Request $request, $roomTotalAmount, $worldId)
+    public function store(Request $request)
     {
+        $content = $request->json()->all();
+        var_dump($content);
+
         // Create world
         $world = new World;
         $world->title = $request->input('title');
@@ -32,7 +36,6 @@ class WorldController extends Controller
             $exits->has_exit_to_room_id = $hasExitToRoomId;
             $exits->save();
         }
-
-        return redirect('/view?{$roomID}');
+        return response()->json((object)['id' => $world->id]);
     }
 }

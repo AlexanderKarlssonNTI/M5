@@ -21,41 +21,39 @@
         <div class="middle-row">
             <div class="controls">
                 <div class="configs">
-                    <form action="Script URL" method="GET|POST">
-                        <div data-require-world="circle" id="circle-inputs"style>
-                            <div class="labels">
-                                <label data-require-world="circle" for="world-number-of-rooms">Total number of rooms:</label>
-                            </div>
-                            <div class="world-inputs">
-                                <input data-require-world="circle" name="room_total_amount" id="world-number-of-rooms" type="number" min="1"/>
-                            </div>
+                    <div data-require-world="circle" id="circle-inputs"style>
+                        <div class="labels">
+                            <label data-require-world="circle" for="world-number-of-rooms">Total number of rooms:</label>
                         </div>
-                        <div data-require-world="rectangle" id="square-inputs">
-                            <div class="labels">
-                                <label data-require-world="rectangle" for="world-side-length">Width:</label>
-                                <label data-require-world="rectangle" for="world-side-width">Height:</label>
-                            </div>
-                            <div class="world-inputs">
-                                <input data-require-world="rectangle" name="room_total_amount" id="world-side-length" type="number" min="1"/>
-                                <input data-require-world="rectangle" name="room_row_amount" id="world-side-width" type="number" min="1"/>
-                            </div>
-                        </div>
-                        <div data-require-world="branch" id="branch-inputs">
-                            <div class="labels">
-                                <label data-require-world="branch" for="world-start-length">Start length:</label>
-                                <label data-require-world="branch" for="world-branch-factor">Branch factor (0-1):</label>
-                            </div>
-                            <div class="world-inputs">
-                                <input data-require-world="branch" name="room_total_amount" id="world-start-length" type="number" min="1"/>
-                                <input data-require-world="branch" name="room_branch_factor" id="world-branch-factor" type="number" min="0" max="1" step=".01">
-                            </div>
+                        <div class="world-inputs">
+                            <input data-require-world="circle" name="room_total_amount" id="world-number-of-rooms" type="number" min="1"/>
                         </div>
                     </div>
-                    <div style="display: flex; flex-direction: row; justify-content: center;">
-                        <button id="btn-generate" onclick="window.location.href='view.html'">Generate</button>
-                        <button id="btn-back" onclick="window.location.href='index.html'">Back</button></div>
+                    <div data-require-world="rectangle" id="square-inputs">
+                        <div class="labels">
+                            <label data-require-world="rectangle" for="world-side-length">Width:</label>
+                            <label data-require-world="rectangle" for="world-side-width">Height:</label>
+                        </div>
+                        <div class="world-inputs">
+                            <input data-require-world="rectangle" name="room_total_amount" id="world-side-length" type="number" min="1"/>
+                            <input data-require-world="rectangle" name="room_row_amount" id="world-side-width" type="number" min="1"/>
+                        </div>
                     </div>
-                </form>
+                    <div data-require-world="branch" id="branch-inputs">
+                        <div class="labels">
+                            <label data-require-world="branch" for="world-start-length">Start length:</label>
+                            <label data-require-world="branch" for="world-branch-factor">Branch factor (0-1):</label>
+                        </div>
+                        <div class="world-inputs">
+                            <input data-require-world="branch" name="room_total_amount" id="world-start-length" type="number" min="1"/>
+                            <input data-require-world="branch" name="room_branch_factor" id="world-branch-factor" type="number" min="0" max="1" step=".01">
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: row; justify-content: center;">
+                    <button id="btn-generate" onclick="saveSpecifiedWorld()">Generate</button>
+                    <button id="btn-back" onclick="window.location.href='index.html'">Back</button></div>
+                </div>
             <div class="preview-container">
                 <h3>Preview:</h3>
                 <div class="preview-display">

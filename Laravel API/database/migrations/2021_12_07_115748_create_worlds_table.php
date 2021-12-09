@@ -27,13 +27,13 @@ class CreateWorldsTable extends Migration
             $table->id();
             $table->string('title');
             $table->boolean('enterable');
-            $table->foreignId('world_id');
+            $table->foreignId('world_id')->constrained('worlds')->cascadeOnDelete();
         });
 
         Schema::create('exits', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('room_id');
-            $table->foreignId('has_exit_to_room_id');
+            $table->foreignId('room_id')->constrained('rooms')->cascadeOnDelete();
+            $table->foreignId('has_exit_to_room_id')->constrained('rooms')->cascadeOnDelete();
         });
     }
 

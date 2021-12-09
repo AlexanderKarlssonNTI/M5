@@ -35,18 +35,18 @@ function onWorldTypeChanged() {
 onWorldTypeChanged();
 
 
-let currentWorld;
+let currentWorld = null;
 let updateCurrentUi = function() {};
 const generateWorld = function () {
     let world;
     if (isNaN(branchFactorConfig.value) || isNaN(numberOfRoomsConfig.value) || isNaN(lengthConfig.value) || isNaN(startLengthConfig.value) || isNaN(widthConfig.value)) {
         console.log('NaNi!? Will not run invalid inputs');
-        return;
+        return false;
     }
     const generate = document.getElementById("btn-generate");
     if (wantedWorldType === 'circle' && numberOfRoomsConfig.value === 0 || wantedWorldType === 'rectangle' && lengthConfig.value === 0 || widthConfig.value === 0 || wantedWorldType === 'branch' && branchFactorConfig.value === 0 || startLengthConfig.value === 0) {
         generate.disabled = true;
-        showWorld(0);
+        showWorld(null);
     }
 
     if (wantedWorldType != 'circle' && numberOfRoomsConfig.value != 0 || wantedWorldType != 'rectangle' && lengthConfig.value != 0 || widthConfig.value != 0 || wantedWorldType != 'branch' && branchFactorConfig.value != 0 || startLengthConfig.value != 0) {
@@ -71,6 +71,9 @@ const generateWorld = function () {
     if (createdWorld !== null) {
         updateCurrentUi = showWorld(createdWorld);
         currentWorld = createdWorld;
+        return true;
+    } else {
+        return false;
     }
 };
 
@@ -113,9 +116,31 @@ for (const [key, value] of Object.entries(buttons)) {
 // branchFactorConfig.oninput = queueUpdate;
 
 function saveSpecifiedWorld() {
+    if (currentWorld == null) {
+        if (!generateWorld()) {
+            console.error('Failed to generate a new world');
+            return;
+        }
+    }
+    if (currentWorld == null) {
+        console.error('Please make a world first')
+        return;
+    }
     let data = new FormData();
-    data.append("data" , "the_text_you_want_to_save");
+    data.append("data" , JSON.stringify(currentWorld));
     let xhr = (window.XMLHttpRequest) ? new XMLHttpRequest() : new activeXObject("Microsoft.XMLHTTP");
-    xhr.open( 'post', '/path/to/php', true );
+    xhr.open( 'post', 'http://localhost:8000/api/create', true );
     xhr.send(data);
+
+    xhr.onreadystatechange = function() {
+        if (this.readyState == 4) {
+            if (this.status == 200) {
+                const getWorldIdFromThisText = xhr.responseText;
+                // Typical action to be performed when the document is ready:
+                location.href='view.html';
+            } else {
+                console.error('Backend failed');
+            }
+        }
+    };
 }
