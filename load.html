@@ -6,46 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="path_OS.css">
     <style>
-        /*Overwrites CSS rules on this web page for "top-row", "middle-row" and "label"*/
-        .top-row {
-            border-top-style: dashed;
-            border-color: rgb(124, 113, 218);
-            justify-content: end;
-            margin-left: 10px;
-            margin-right: 10px;
-            padding-top: 1vh;
-        }
-        .middle-row {
-            border-style: solid;
-            border-color: rgb(124, 113, 218);
-            padding: 6px;
-            background-color: #959595;
-        }
         label {
             margin-left: 0;
-        }
-
-        /*Implements some CSS rules for aligning the page*/
-        .name-data-label {
-            margin-right: 27vw;
-        }
-        .type-data-label {
-            margin-right: 5vw;
-        }
-        .world-data-column {
-            width: 52.5vw;
-            flex-direction: column;
-            display: flex;
-            text-align: center;
-            border-right-style: dashed;
-            border-color: rgb(124, 113, 218);
-        }
-        .type-data {
-            width: 19vw;
-        }
-        .room-amount-data {
-            width: 18.5vw;
-            border-style: none;
         }
     </style>
     <title>Path OS - Load</title>
@@ -54,12 +16,12 @@
 <body>
     <div class="content">
         <h1 class="create">Load</h1>
-        <div class="top-row">
+        <div class="top-row-load">
             <label class="name-data-label">Name</label>
             <label class="type-data-label">Type</label>
             <label># of rooms</label>
         </div>
-        <div class="middle-row">
+        <div class="middle-row-load">
             <div class="world-data-column">
                 <label>A great sample of doom</label>
                 <label>A varm velcome of hell</label>
