@@ -136,6 +136,7 @@ function saveSpecifiedWorld() {
         if (this.readyState == 4) {
             if (this.status == 200) {
                 const getWorldIdFromThisText = xhr.responseText;
+                getWorldIdFromThisText
                 // Typical action to be performed when the document is ready:
                 location.href='view.html';
             } else {

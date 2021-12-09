@@ -277,7 +277,8 @@ input::-webkit-inner-spin-button {
     background-color: #6F4F25;
 }
 .row > .room.blocked {
-    background-color: #433900;
+    /*background-color: #433900;*/
+    opacity: 0;
 }
 #row-container > .spacer > .spacer-room,
 .row > .room {
@@ -326,7 +327,7 @@ input::-webkit-inner-spin-button {
 }
 .spacer::after,
 .spacer-room::after {
-    transition: 0.2s;
+    transition: 0;
 }
 /* End of preview */
 
