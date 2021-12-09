@@ -36,6 +36,7 @@ class WorldController extends Controller
             $exits->has_exit_to_room_id = $hasExitToRoomId;
             $exits->save();
         }
+
         return response()->json((object)['id' => $world->id]);
     }
 }
