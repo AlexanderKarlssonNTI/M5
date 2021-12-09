@@ -257,6 +257,7 @@ function saveSpecifiedWorld() {
     let data = new FormData();
     data.append("data" , JSON.stringify(currentWorld));
     let xhr = (window.XMLHttpRequest) ? new XMLHttpRequest() : new activeXObject("Microsoft.XMLHTTP");
+    // Access-Control-Allow-Origin: http://localhost:8000/api/create;
     xhr.open( 'post', 'http://localhost:8000/api/create', true );
     xhr.send(data);
 
@@ -264,7 +265,6 @@ function saveSpecifiedWorld() {
         if (this.readyState == 4) {
             if (this.status == 200) {
                 const getWorldIdFromThisText = xhr.responseText;
-                getWorldIdFromThisText
                 // Typical action to be performed when the document is ready:
                 location.href='view.html';
             } else {

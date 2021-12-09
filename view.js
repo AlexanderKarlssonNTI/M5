@@ -86,7 +86,7 @@ function showWorld(world) {
                         spacerAbove.classList.toggle('has-path', roomAboveOf);
                     }
                     {
-                        const roomBelowOf =room.hasExitTo(world.roomBelowOf(room)) ;
+                        const roomBelowOf = room.hasExitTo(world.roomBelowOf(room)) ;
                         roomDiv.classList.toggle('path-to-below', roomBelowOf);
                         spacerBelow.classList.toggle('has-path', roomBelowOf);
                     }

@@ -9,6 +9,14 @@ class WorldController extends Controller
 {
     public function store(Request $request)
     {
+        $request->validate([
+            'title' => 'nullable',
+            'type' => 'required',
+            'room_branch_factor' => 'nullable',
+            'room_row_factor' => 'nullable',
+            'room_total_factor' => 'required',
+        ]);
+
         $content = $request->json()->all();
         var_dump($content);
 
@@ -16,9 +24,9 @@ class WorldController extends Controller
         $world = new World;
         $world->title = $request->input('title');
         $world->type = $request->input('type');
-        $world->roomBranchFactor = $request->input('room_branch_factor');
-        $world->roomRowAmount = $request->input('room_row_amount');
-        $world->roomTotalAmount = $request->input('room_total_amount');
+        $world->room_branch_factor = $request->input('room_branch_factor');
+        $world->room_row_amount = $request->input('room_row_amount');
+        $world->room_total_amount = $request->input('room_total_amount');
         $world->save();
 
         // Create rooms of world
