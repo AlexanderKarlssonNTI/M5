@@ -70,7 +70,12 @@ class World {
                 this.generateRectangleWorld(parameter1,parameter2);
                 break;
             case "branch":
+                let branchCheckBox = document.getElementById("connect-branch-box");
+                if (branchCheckBox.checked == true) {
                 this.generateBranchWorldAlternative(parameter1,parameter2);
+                } else {
+                    this.generateBranchWorld(parameter1,parameter2);
+                }
                 break;
             default:
                 console.log("Error: Invalid inputs");
