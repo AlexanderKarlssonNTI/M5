@@ -54,9 +54,9 @@ input, textarea {
     --light-purple: #6c5eb5;
     --dark-brown: #433900;
     --light-brown: #6f4f25;
-    --light-grey: #6c6c6c;
+    --medium-grey: #6c6c6c;
     --medium-grey: #444444;
-    --dark-grey: #959595;
+    --light-grey: #959595;
     --light-green: #9AD284;
     --dirt-brown: #68372B;
 }
@@ -71,14 +71,14 @@ input, textarea {
     height: 1vh;
 }
 *::-webkit-scrollbar-track {
-    background: var(--light-purple);
+    background: var(--blue);
 }
 *::-webkit-scrollbar-thumb {
-    background: #000000;
+    background: var(--light-grey);
 }
-*::-webkit-scrollbar-thumb:hover {
-    background: #000000;
-}
+/* *::-webkit-scrollbar-thumb:hover {
+    background: var(--light-grey);
+} */
 
 button {
     font-family: "C64Mono";
@@ -228,6 +228,7 @@ input::-webkit-inner-spin-button {
     border:6px solid #000000;
     padding: 6px;
     background-color: var(--white);
+    overflow: auto;
 }
 
 .middle-row > .controls {

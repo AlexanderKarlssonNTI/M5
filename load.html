@@ -13,6 +13,19 @@
 
         label {
             margin-left: 0;
+            word-wrap: none;
+        }
+        input[type=checkbox] {
+            border-width: 0px;
+            margin: 0px;
+            padding: 0px;
+            width: 0px;
+            height: 0px;
+        }
+
+        label.selected {
+            background-color: #000000;
+            color: #ffffff;
         }
     </style>
     <title>Path OS - Load</title>
@@ -28,19 +41,19 @@
         </div>
         <div class="middle-row-load">
             <div id="world-name" class="world-data-column">
-                <label>A great sample of doom</label>
-                <label>A warm welcome of hell</label>
-                <label>A satanic sky of suspicion</label>
+                <label class="world1"><input type="checkbox" value="1" onchange="worldselected('world1')">A great sample of doom</label>
+                <label class="world2"><input type="checkbox" value="2" onchange="worldselected('world2')">A warm welcome of hell</label>
+                <label class="world3"><input type="checkbox" value="3" onchange="worldselected('world3')">A satanic sky of suspicion</label>
             </div>
             <div id="world-type" class="world-data-column type-data">
-                <label>Circular</label>
-                <label>Branch</label>
-                <label>Rectangle</label>
+                <label class="world1"><input type="checkbox" value="1" onchange="worldselected('world1')">Circular</label>
+                <label class="world2"><input type="checkbox" value="2" onchange="worldselected('world2')">Branch</label>
+                <label class="world3"><input type="checkbox" value="3" onchange="worldselected('world3')">Rectangle</label>
             </div>
             <div id="world-room-amount" class="world-data-column room-amount-data">
-                <label>123</label>
-                <label>42</label>
-                <label>69</label>
+                <label class="world1"><input type="checkbox" value="1" onchange="worldselected('world1')">123</label>
+                <label class="world2"><input type="checkbox" value="2" onchange="worldselected('world2')">42</label>
+                <label class="world3"><input type="checkbox" value="3" onchange="worldselected('world3')">69</label>
             </div>
         </div>
         <div style="display: flex; flex-direction: row; justify-content: center;">
@@ -49,6 +62,34 @@
         </div>
 
     </div>
+    <script>
+        let selectedWorld;
+        function worldselected(world) {
+            let temp = document.getElementsByClassName(world);
+            for (let x = 0; x < temp.length;x++) {
+                if (temp[x].backgroundColor = "#ffffff") {
+                    temp[x].classList.toggle("selected");
+                }
+                else if (temp[x].backgroundColor = "#000000") {
+                    temp[x].classList.toggle("selected");
+                }
+            }
+            if (selectedWorld == "") {
+                selectedWorld = world;
+            }
+            else if (selectedWorld != '' && selectedWorld != world) {
+                let temp2 = document.getElementsByClassName(selectedWorld);
+                for (let x = 0; x < temp2.length;x++) {
+                    temp2[x].classList.toggle("selected");
+                }
+                selectedWorld = world;
+            }
+            else if (selectedWorld != '' && selectedWorld == world) {
+                selectedWorld = '';
+            }
+            console.log(selectedWorld);
+        }
+    </script>
     <script type="text/javascript" src="load.js"></script>
 </body>
 
