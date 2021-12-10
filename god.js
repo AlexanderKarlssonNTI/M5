@@ -1,6 +1,6 @@
 class Room {
-    constructor(id) {
-        this.name = this.Baptist();
+    constructor(id, name = null) {
+        this.name = name || this.Baptist();
         this.ID = id;
         this.exits = new Array;
         this.canEnter = true;
@@ -64,15 +64,15 @@ class World {
         this.sideLength = new Number;
         switch(Type) {
             case "circle":
-                this.name = 'Not empty'
+                this.name = 'Hello circle world'
                 this.generateCircleWorld(parameter1);
                 break;
             case "rectangle":
-                this.name = 'Not empty'
+                this.name = 'Hello rectangle world'
                 this.generateRectangleWorld(parameter1,parameter2);
                 break;
             case "branch":
-                this.name = 'Not empty'
+                this.name = 'Hello branch world'
                 let branchCheckBox = document.getElementById("connect-branch-box");
                 if (branchCheckBox.checked == true) {
                 this.generateBranchWorldAlternative(parameter1,parameter2);
@@ -80,8 +80,24 @@ class World {
                     this.generateBranchWorld(parameter1,parameter2);
                 }
                 break;
+            case "load":
+                this.load(parameter1);
+                break;
             default:
                 console.log("Error: Invalid inputs");
+        }
+    }
+    load(data) {
+        this.name = data.name;
+        this.type = data.type;
+        this.rooms = [];
+        this.sideLength = data.sideLength;
+
+        for (const room of data.rooms) {
+            const createdRoom = new Room(room.ID, room.name);
+            createdRoom.canEnter = room.canEnter;
+            createdRoom.exits = room.exits;
+            this.rooms.push(createdRoom);
         }
     }
     generateCircleWorld(nrOfRooms) {
