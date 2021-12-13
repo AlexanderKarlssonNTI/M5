@@ -55,7 +55,7 @@ input, textarea {
     --dark-brown: #433900;
     --light-brown: #6f4f25;
     --medium-grey: #6c6c6c;
-    --medium-grey: #444444;
+    --dark-grey: #444444;
     --light-grey: #959595;
     --light-green: #9AD284;
     --dirt-brown: #68372B;
@@ -425,18 +425,18 @@ input::-webkit-inner-spin-button {
     align-items: center;
     font-size: small;
     overflow: none;
-    /* background-color: #6C6C6C; */
+    background-color: #000000;
     gap: 10px;
     height: 60%;
     margin: 14px auto 0;
     padding: 14px;
-    background-color: var(--dark-grey);
-    border: 6px solid #000000;
+    border: 6px solid var(--medium-grey);
 }
 
 .logo p {
     margin: 0;
     font-family: 'C64Mono';
+    color:white;
 }
 
 .word {
@@ -484,7 +484,7 @@ input::-webkit-inner-spin-button {
     /* background-color: #959595; */
     margin: 0;
     padding-top: 20px;
-    padding-bottom: 20px;
+    padding-bottom: 10px;
 }
 
 .nav-bar {
