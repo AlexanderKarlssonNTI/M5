@@ -5,12 +5,12 @@ console.log('viewed world id: ', viewedWorldId);
 let currentWorld = null;
 let updateCurrentUi = function() {};
 if (!isNaN(viewedWorldId)) {
-    fetch('http://localhost:8000/api/view/' + viewedWorldId)
+    fetch('http://localhost:8000/api/worlds/' + viewedWorldId)
         .then(function (response) { return response.json(); })
         .then(function (data) {
-            // TODO: update ui to show the fetched world
             console.log(data);
             currentWorld = new World(data.name, 'load', data);
+            document.getElementById('world-name').textContent = data.name;
             updateCurrentUi = showWorld(currentWorld);
         })
         .catch(function (error) {
@@ -19,24 +19,64 @@ if (!isNaN(viewedWorldId)) {
 }
 
 
+let currentlySelectedRoomId = null;
+function selectRoomId(roomId) {
+    if (typeof roomId === 'number') {
+        // Make sure we don't mix numbers and strings.
+        roomId = String(roomId);
+    }
+    if (currentlySelectedRoomId === roomId) {
+        // Already selected
+        selectRoomId(null);
+        return;
+    }
+    if (currentlySelectedRoomId !== null) {
+        // Unselect old room.
+        for (const element of document.querySelectorAll(`.room[data-room-id="${currentlySelectedRoomId}"]`)) {
+            element.classList.remove('selected');
+        }
+        currentlySelectedRoomId = null;
+    }
+    if (roomId !== null) {
+        for (const element of document.querySelectorAll(`.room[data-room-id="${roomId}"]`)) {
+            element.classList.add('selected');
+        }
+        currentlySelectedRoomId = roomId;
+    }
+}
+
+
 const preview = document.getElementById('row-container');
+const editPathsButton = document.getElementById('btn-edit-paths');
+
+editPathsButton.addEventListener('click', function(e) {
+
+});
+
 preview.addEventListener('click', function (e) {
-    console.log("Preparing preview");
+    console.log("Preparing View");
     const roomId = e.target.getAttribute('data-room-id');
     console.log(roomId);
     if (roomId === undefined || roomId === null) {
         console.log("room ID invalid, didn't click on a room");
+        selectRoomId(null);
         return;
     }
+    selectRoomId(roomId);
     console.log("Room id valid");
     const room = currentWorld.rooms[roomId - 1];
 
-    room.canEnter = !room.canEnter;
-    console.log("Preview done");
+    //room.canEnter = !room.canEnter;
+    console.log("View done");
 
     updateCurrentUi();
     console.log("Updating");
 });
+
+// Saving edits remains to be done in the current state
+function saveWorldEdits() {
+    
+}
 
 
 function SPF(world, startID, endID) {
