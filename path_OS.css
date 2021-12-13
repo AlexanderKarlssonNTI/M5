@@ -127,10 +127,14 @@ button.selected {
     align-self: center;
     padding-top: 0.6vh;
 }
-.btn-back {
+.btn-back, .btn-delete {
     width: 15vw;
     height: 5vw;
     font-size: 3vw;
+}
+.btn-delete {
+    margin-right: 6vw;
+    width: 20vw;
 }
 
 #preview-btn {
@@ -143,7 +147,7 @@ label {
     display: flex;
     flex-direction: column;
 }
-input[type=number] {
+input[type=number], input[type=text] {
     color: var(--dark-purple);
     background-color: var(--light-purple);
     border-style: none;
@@ -152,6 +156,11 @@ input[type=number] {
     margin: 0.5vw;
     width: 10vw;
     font-size: 1.3vw;
+}
+
+input[type=text] {
+    height: 3.5vh;
+    width: 26vw;
 }
 
 input[type=checkbox] {
@@ -198,6 +207,11 @@ input::-webkit-inner-spin-button {
     margin-left: 10vw;
     font-size: 3vw;
 }
+.name {
+    font-size: 2.7vw;
+    margin-left: 9.4vw;
+    margin-bottom: 1.5vh;
+}
 
 .top-row, .top-row-load {
     display: flex;
@@ -224,6 +238,7 @@ input::-webkit-inner-spin-button {
 }
 
 .middle-row-load {
+    align-items: flex-start;
     border-style: solid;
     border:6px solid #000000;
     padding: 6px;
@@ -339,7 +354,10 @@ input::-webkit-inner-spin-button {
     flex: 1;
 }
 .row > .room {
-    background-color: #6F4F25;
+    background-color: var(--light-brown);
+}
+.row > .room.selected {
+    background-color: var(--dark-brown);
 }
 .row > .room.blocked {
     /*background-color: #433900;*/
@@ -426,7 +444,7 @@ input::-webkit-inner-spin-button {
 }
 
 .letter {
-    word-wrap: none;
+    white-space: nowrap;
 }
 
 .menu-buttons {
@@ -470,13 +488,14 @@ input::-webkit-inner-spin-button {
     flex-direction: row;
     justify-content: center;
     flex: 1 1 auto;
+    align-items: center;
 }
 
 .name-data-label {
-    margin-right: 27vw;
+    margin-right: 26vw;
 }
 .type-data-label {
-    margin-right: 5vw;
+    margin-right: 6vw;
 }
 .world-data-column {
     width: 52.5vw;
@@ -492,4 +511,8 @@ input::-webkit-inner-spin-button {
 .room-amount-data {
     width: 18.5vw;
     border-style: none;
+}
+
+.edit-buttons > * {
+    margin: 0;
 }
