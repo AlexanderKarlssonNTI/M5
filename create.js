@@ -43,12 +43,6 @@ let currentWorld = null;
 let updateCurrentUi = function () { };
 const generateWorld = function (showAsWell = true) {
     let createdWorld;
-    if (nameConfig.value === 'test message') {
-        console.log('message for display script triggered');
-        messageLabel = document.createElement('label');
-        messageLabel.innerHTML = 'Now this message is shown!';
-        document.getElementById('row-container').appendChild(messageLabel);
-    }
 
     // Default world name
     let worldName;
@@ -66,7 +60,7 @@ const generateWorld = function (showAsWell = true) {
             if (isNaN(numberOfRooms)) {
                 errorMessage = 'Number of rooms is not a number';
             } else if (numberOfRooms <= 0) {
-                errorMessage = 'Must be at least one room for a circular room';
+                errorMessage = 'Must be at least one room for a circular world';
             } else if (numberOfRooms > 1000) {
                 errorMessage = 'There is such a thing as too big';
             } else {
@@ -100,9 +94,8 @@ const generateWorld = function (showAsWell = true) {
             } else if (startLength > 1000) {
                 errorMessage = 'There is such a thing as too big';
             } else {
-                createdWorld = new World(worldName, 'rectangle', length, width);
+                createdWorld = new World(worldName, branchCheckBoxConfig.checked ? 'branch-alternative' : 'branch', startLength, branchFactor);
             }
-            createdWorld = new World(worldName, branchCheckBoxConfig.checked ? 'branch-alternative' : 'branch', parseInt(startLengthConfig.value), parseFloat(branchFactorConfig.value));
             break;
     }
 
@@ -120,7 +113,7 @@ const generateWorld = function (showAsWell = true) {
         updateCurrentUi = function () { };
     }
 
-    // Show error after we clear the world preview (since that clears eveything in the `row-container`)
+    // Show error after we clear the world preview (since that clears everything in the `row-container`)
     if (errorMessage !== null) {
         console.error('Failed to create world because: ', errorMessage);
         messageLabel = document.createElement('span');
