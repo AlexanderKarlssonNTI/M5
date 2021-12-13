@@ -15,7 +15,7 @@ loadingAllWorlds
                 input.type = 'checkbox';
                 const worldId = world.id;
                 input.onchange = function () {
-                    worldselected(worldId);
+                    worldSelected(worldId);
                 };
                 label.appendChild(input);
 
@@ -37,7 +37,7 @@ function changeSelectedClass(world, shouldBeSelected) {
         worldLabels[x].classList.toggle("selected", shouldBeSelected);
     }
 }
-function worldselected(world) {
+function worldSelected(world) {
     world = String(world);
     if (selectedWorld === '') {
         changeSelectedClass(world, true);
