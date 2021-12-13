@@ -162,6 +162,10 @@ input[type=text] {
     height: 3.5vh;
     width: 26vw;
 }
+::placeholder {
+    color: unset;
+    opacity: 0.6;
+}
 
 input[type=checkbox] {
     appearance: none;
