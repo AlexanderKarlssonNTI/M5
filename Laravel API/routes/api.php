@@ -21,5 +21,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::middleware(['cors'])->group(function () {
     Route::post('create', [WorldController::class, 'store']);
     Route::get('load', [WorldController::class, 'load']);
-    Route::get('view/{worldId}', [WorldController::class, 'view']);
+    Route::delete('worlds/{worldId}/delete', [WorldController::class, 'delete']);
+    Route::get('worlds/{worldId}', [WorldController::class, 'view']);
+    Route::put('worlds/{worldId}', [WorldController::class, 'edit']);
 });

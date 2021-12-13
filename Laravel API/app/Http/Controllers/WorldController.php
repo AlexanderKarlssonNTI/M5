@@ -12,16 +12,19 @@ class WorldController extends Controller
 {
     public function store(Request $request)
     {
-        $content = json_decode($request->input('data'));
+        $allContent = json_decode($request->getContent());
+        $content = $allContent->world;
 
         $worldId = 0;
-        DB::transaction(function() use ($request, $content, &$worldId) {
+        DB::transaction(function() use ($content, $allContent, &$worldId) {
             // Create world
             $world = new World;
             $world->title = $content->name;
-            $world->type = $request->input('type');
+            $world->type = $allContent->type;
             $world->side_length = $content->sideLength;
-            $world->room_branch_factor = $request->input('room_branch_factor');
+            if (property_exists($allContent, 'roomBranchFactor')) {
+                $world->room_branch_factor = $allContent->roomBranchFactor;
+            }
             $world->room_row_amount = ceil(count($content->rooms) / $content->sideLength);
             $world->room_total_amount = count($content->rooms);
             $world->save();
@@ -63,17 +66,22 @@ class WorldController extends Controller
         
         foreach ($worlds as $world) {
             $info = (object)[];
-            $info->id = $world->worldId;
+            $info->id = $world->id;
             $info->name = $world->title;
             $info->type = $world->type;
-            $info->sideLength = $world->sideLength;
+            $info->sideLength = $world->side_length;
             $info->roomTotalAmount = $world->room_total_amount;
             array_push($worldInfo, $info);
         }
 
         return response()->json((object)['worlds' => $worldInfo]);
     }
-    public function view(Request $request, $worldId)
+    public function delete($worldId)
+    {
+        $world = World::findOrFail($worldId);
+        $world->delete();
+    }
+    public function view($worldId)
     {
         $world = World::findOrFail($worldId);
         $content = (object)[];
@@ -110,5 +118,12 @@ class WorldController extends Controller
         }
 
         return response()->json($content);
+    }
+    public function edit(Request $request, $worldId)
+    {
+        $allContent = json_decode($request->getContent());
+        $content = $allContent->world;
+
+        $world = World::findOrFail($worldId);
     }
 }

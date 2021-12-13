@@ -1,21 +1,76 @@
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
 
-fetch('http://localhost:8000/api/load')
-    .then(function (response) { return response.json(); })
+loadingAllWorlds
     .then(function (data) {
         console.log(data);
         for (const world of data.worlds) {
-            const createLabel = function(text) {
+            const createEntry = function (text) {
                 const label = document.createElement('label');
-                label.textContent = text;
+                label.textContent = text || 'No name';
+                label.setAttribute('data-world-id', world.id);
+
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                const worldId = world.id;
+                input.onchange = function () {
+                    worldselected(worldId);
+                };
+                label.appendChild(input);
+
                 return label;
             }
-            // TODO: Add links with id to the corresponding world, possibly in a layout where all fields of a world are contained in rows and instead adding borders between columns via an absolutly positioned element
-            document.getElementById('world-name').appendChild(createLabel(world.name));
-            // TODO: Change the world type data in some way to show it starting with a capital letter
-            document.getElementById('world-type').appendChild(createLabel(world.type));
-            document.getElementById('world-room-amount').appendChild(createLabel(world.roomTotalAmount));
+            document.getElementById('world-name').appendChild(createEntry(world.name));
+            document.getElementById('world-type').appendChild(createEntry(capitalizeFirstLetter(world.type)));
+            document.getElementById('world-room-amount').appendChild(createEntry(world.roomTotalAmount));
         }
     })
     .catch(function (error) {
         console.error('Failed to get info from backend:\n', error);
     });
+
+let selectedWorld = '';
+function changeSelectedClass(world, shouldBeSelected) {
+    let worldLabels = document.querySelectorAll(`[data-world-id="${world}"]`);
+    for (let x = 0; x < worldLabels.length; x++) {
+        worldLabels[x].classList.toggle("selected", shouldBeSelected);
+    }
+}
+function worldselected(world) {
+    world = String(world);
+    if (selectedWorld === '') {
+        changeSelectedClass(world, true);
+        selectedWorld = world;
+    }
+    else if (selectedWorld !== '' && selectedWorld !== world) {
+        changeSelectedClass(selectedWorld, false);
+        changeSelectedClass(world, true);
+        selectedWorld = world;
+    }
+    else if (selectedWorld !== '' && selectedWorld === world) {
+        changeSelectedClass(world, false);
+        selectedWorld = '';
+    }
+    console.log(selectedWorld);
+}
+
+function deleteSelectedWorld(selectedWorld) {
+    fetch('http://localhost:8000/api/worlds/' + selectedWorld + "/delete", {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({id: selectedWorld})
+    })
+    .then(function() {
+        // remove selected world
+        const elements = document.querySelectorAll(`[data-world-id="${selectedWorld}"]`);
+        for (const element of elements) {
+            element.parentElement.removeChild(element);
+        }
+    })
+    .catch(function(error) {
+        console.error('Failed to remove world:\n', error);
+    })
+};
