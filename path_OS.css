@@ -238,7 +238,7 @@ input::-webkit-inner-spin-button {
 }
 
 .middle-row-load {
-    align-items: flex-start;
+    align-items: unset;
     border-style: solid;
     border:6px solid #000000;
     padding: 6px;
