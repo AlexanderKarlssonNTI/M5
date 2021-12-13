@@ -50,7 +50,7 @@ const preview = document.getElementById('row-container');
 const editPathsButton = document.getElementById('btn-edit-paths');
 
 editPathsButton.addEventListener('click', function(e) {
-
+    
 });
 
 preview.addEventListener('click', function (e) {
@@ -73,7 +73,7 @@ preview.addEventListener('click', function (e) {
     console.log("Updating");
 });
 
-// Saving edits remains to be done in the current state
+
 function saveWorldEdits() {
     
 }
