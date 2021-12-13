@@ -17,12 +17,16 @@
 </head>
 
 <body>
-    <h1 class="world-header">World View<br>jeff</h1>
+    <h1 class="world-header">World View<br><span id="world-name">jeff</span></h1>
     <div class="view" id="row-container"></div>
     <div class="nav-bar">
         <button onclick="window.location.href='index.html'">Menu</button>
-        <button>Save</button>
-        <button>Add paths</button>
+        <button onclick="saveWorldEdits()">Save</button>
+        <fieldset class="edit-buttons">
+            <legend>Edit:</legend>
+            <button id="btn-edit-paths">Paths</button>
+            <button id="btn-toggle-rooms">Rooms</button>
+        </fieldset>
         <button>Pathfinder</button>
     </div>
     <script type="text/javascript" src="god.js"></script>
