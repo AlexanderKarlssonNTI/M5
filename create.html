@@ -27,7 +27,11 @@
         <div class="middle-row">
             <div class="controls">
                 <div class="configs">
-                    <div data-require-world="circle" id="circle-inputs"style>
+                    <div style="display: flex; flex-direction: row;">
+                        <label class="name" for="world-name">Title:</label>
+                        <input id="world-name" type="text" placeholder="(Optional)">
+                    </div>
+                    <div data-require-world="circle" id="circle-inputs">
                         <div class="labels">
                             <label data-require-world="circle" for="world-number-of-rooms">Total number of rooms:</label>
                         </div>
