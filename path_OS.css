@@ -516,3 +516,26 @@ input::-webkit-inner-spin-button {
 .edit-buttons > * {
     margin: 0;
 }
+
+.edit-buttons {
+    display: none;
+}
+
+.edit-buttons.on {
+    display: block;
+}
+
+.room-info {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 100px;
+}
+
+#room-display {
+    text-align: center;
+}
+
+.room-info p {
+    margin: 0;
+}

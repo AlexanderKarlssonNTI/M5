@@ -12,6 +12,10 @@
             width: unset;
             min-height: 80%;
         }
+
+        #pathfinder-btn.off ,#edit-btn.off {
+            display: none;
+        }
     </style>
     <title>Path OS - View</title>
 </head>
@@ -21,17 +25,47 @@
     <div class="view" id="row-container"></div>
     <div class="nav-bar">
         <button onclick="window.location.href='index.html'">Menu</button>
-        <button onclick="saveWorldEdits()">Save</button>
-        <fieldset class="edit-buttons">
+        <button id="edit-btn" onclick="EnterEditMode()">Edit</button>
+        <fieldset class="edit-buttons" id="edit-btns">
             <legend>Edit:</legend>
+            <button onclick="saveWorldEdits()" id="save-btn">Save</button>
             <button id="btn-edit-paths">Paths</button>
             <button id="btn-toggle-rooms">Rooms</button>
+            <button id="back-btn-edit">Back</button>
         </fieldset>
-        <button>Pathfinder</button>
+        <button id="pathfinder-btn">Pathfinder</button>
+    </div>
+    <div class="room-display" style="text-align: center;">
+        <p id="room-display-name" style="margin-bottom:0px;">The bloody hallway of happines</p>
+        <div class="room-info">
+            <div id="room-info-id">
+                <p>Id:</p>
+                <p id="room-display-id">Id:10</p>
+            </div>
+            <div id="room-info-exits">
+                <p>Exits</p>
+                <p id="room-display-exits">9,20,100,2,5,6,9</p>
+            </div>
+        </div>
     </div>
     <script type="text/javascript" src="god.js"></script>
     <script type="text/javascript" src="display.js"></script>
     <script src="view.js"></script>
+    <script type="text/javascript">
+        function EnterEditMode() {
+            document.getElementById("edit-btn").classList.toggle("off", true);
+            document.getElementById("pathfinder-btn").classList.toggle("off", true);
+            document.getElementById("edit-btns").classList.toggle("on", true);
+        }
+
+        document.getElementById("save-btn").addEventListener("click", ExitEditMode);
+        document.getElementById("back-btn-edit").addEventListener("click", ExitEditMode);
+        function ExitEditMode() {
+            document.getElementById("edit-btn").classList.toggle("off", false);
+            document.getElementById("pathfinder-btn").classList.toggle("off", false);
+            document.getElementById("edit-btns").classList.toggle("on", false);
+        }
+    </script>
 </body>
 
 </html>
