@@ -1,8 +1,8 @@
 # M5
 <!-- Some of the ASCII art is intentionally misaligned without markdown to correctly align in the proper view with markdown. A preview of this can be shown in VS Code via the keybindings ctrl + shift + v -->
 ```
-  _______      ____        ____________     __     __          _______         ______
-|   ____  \  /  __  \     |____    ____|   |  |   |  |       /   ___   \     /   __   \
+  _______          ____        ____________     __     __          _______         ______
+|   ____  \      /  __  \     |____    ____|   |  |   |  |       /   ___   \     /   __   \
 |  |    |  |    /  /  \  \         |  |	       |  |   |  |      |   /   \   |   |   |  |___|
 |  |    |  |   |  |    |  |        |  |	       |  |___|  |      |  |     |  |   |   |
 |  |____|  |   |  |____|  |        |  |	       |   ___   |      |  |     |  |   |    \ __
