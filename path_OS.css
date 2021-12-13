@@ -416,7 +416,7 @@ input::-webkit-inner-spin-button {
 .spacer-room::after {
     transition: none;
 }
-/* End of preview */
+/* End of preview and view */
 
 .logo {
     display: flex;
@@ -491,17 +491,28 @@ input::-webkit-inner-spin-button {
     display: flex;
     flex-direction: row;
     justify-content: center;
-    flex: 1 1 auto;
+    /*flex: 1 1 auto;*/
     align-items: center;
+    height: 5vh;
+    margin-top: 3vh;
+    margin-bottom: 2vh;
 }
 
 .name-data-label {
-    margin-right: 26vw;
+    margin-right: 26.4vw;
 }
 .type-data-label {
-    margin-right: 6vw;
+    margin-right: 5.6vw;
+}
+
+table {
+    table-layout: fixed;
+    width: 100%;
 }
 .world-data-column {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
     width: 52.5vw;
     flex-direction: column;
     display: flex;
