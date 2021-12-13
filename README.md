@@ -1,5 +1,4 @@
-# M5
-<!-- Some of the ASCII art is intentionally misaligned without markdown to correctly align in the proper view with markdown. A preview of this can be shown in VS Code via the keybindings ctrl + shift + v -->
+<!-- Some of the ASCII art is intentionally misaligned without markdown to correctly align in the proper view with markdown. A preview of this can usually be shown in VS Code via the keybindings ctrl + shift + v -->
 ```
   _______          ____        ____________     __     __          _______         ______
 |   ____  \      /  __  \     |____    ____|   |  |   |  |       /   ___   \     /   __   \
@@ -22,7 +21,7 @@ This program stores its map data by utilizing an API built in the PHP framework 
 ## Prerequisites
 
 - **[MySQL or alike, setup via a program such as XAMPP](https://www.apachefriends.org/)**
-- **[PHP]()**
+- **[PHP](https://www.php.net/downloads.php)**
 - **[A tool to download dependencies with, for example Composer](https://getcomposer.org/download/)**
 
 Download the repository, this can be done via the "code" options on this Github page. To link it for commits, use a URL found in the same options.
