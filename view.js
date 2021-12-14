@@ -52,8 +52,56 @@ let isPathfinding = false;
 pathfinderButton.addEventListener('click', function () {
     isPathfinding = !isPathfinding;
     selectRoomId(null);
-    pathfinderButton.classList.toggle('selected', isPathfinding);
+    pathfindingMode(pathfindingPhase,'');
+    // pathfinderButton.classList.toggle('selected', isPathfinding);
 });
+
+let pathfindingPhase = 1;
+let pathfinderStart;
+let pathfinderEnd;
+let PathfinderSelectS = document.getElementById("Pathfinder-selectS");
+let PathfinderSelectE = document.getElementById("Pathfinder-selectE");
+let PathfinderResults = document.getElementById("Pathfinder-results");
+function pathfindingMode(phase,inputRoom) {
+    if (phase === 1){
+        console.log("Phase 1")
+        PathfinderSelectS.classList.toggle("on",true);
+        PathfinderSelectE.classList.toggle("on",false);
+        PathfinderResults.classList.toggle("on",false);
+        pathfindingPhase = 2;
+    }
+    else if (phase === 2){
+        console.log("Phase 2")
+        PathfinderSelectS.classList.toggle("on",false);
+        PathfinderSelectE.classList.toggle("on",true);
+        pathfinderStart = inputRoom;
+        pathfindingPhase = 3;
+    }
+    else if (phase === 3){
+        console.log("Phase 3")
+        PathfinderSelectE.classList.toggle("on",false);
+        PathfinderResults.classList.toggle("on",true);
+        pathfinderEnd = inputRoom;
+        let paths = [];
+        if (currentWorld.type != "rectangle") {
+            paths = SPF(currentWorld, pathfinderStart, pathfinderEnd);
+        }
+        let shortestPath = paths[0];
+        for (let x = 1; x<paths.length;x++) {
+            if (paths[x].length < shortestPath.length) {
+                shortestPath = paths[x];
+            }
+        }
+        PathfinderResults.innerHTML = "Shortest path between "+pathfinderStart+" and "+pathfinderEnd+":<br />"+shortestPath;
+        selectRoomId(null);
+        isPathfinding = !isPathfinding;
+        pathfindingPhase = 1;
+    }
+    else{
+        console.log("ERROR WITH PATHFINDING");
+    }
+}
+
 
 
 const editModes = {
@@ -103,7 +151,7 @@ function selectRoomId(roomId) {
 
 const preview = document.getElementById('row-container');
 preview.addEventListener('click', function (e) {
-    console.log("Preparing View");
+    // console.log("Preparing View");
     const roomId = e.target.getAttribute('data-room-id');
     console.log(roomId);
     if (roomId === undefined || roomId === null) {
@@ -111,7 +159,7 @@ preview.addEventListener('click', function (e) {
         selectRoomId(null);
         return;
     }
-    console.log("Room id valid");
+    // console.log("Room id valid");
     const room = currentWorld.rooms[roomId - 1];
 
     if (currentlyEditing) {
@@ -163,23 +211,23 @@ preview.addEventListener('click', function (e) {
         }
     } else {
         if (isPathfinding) {
-            if (currentlySelectedRoomId == roomId) {
-                // Clicked on same room twice so just unselect:
-                selectRoomId(null);
-            } else if (currentlySelectedRoomId !== null) {
-                const selectedRoomId = currentlySelectedRoomId;
-                selectRoomId(null);
-
-                const previousRoomId = parseInt(selectedRoomId);
-                if (isNaN(previousRoomId)) {
-                    console.error('invalid selected room id', selectedRoomId);
-                    return;
+            if (currentlySelectedRoomId !== null) {
+                switch(pathfindingPhase){
+                    case 2:
+                        pathfindingMode(2,room.ID);
+                        break;
+                    case 3:
+                        pathfindingMode(3,room.ID);
+                        break;
+                    default:
+                        pathfindingMode(1,'');
                 }
-
-                const previousRoom = currentWorld.rooms[previousRoomId - 1];
-
-                // TODO: handle pathfinding from `previousRoom` to `room`
-                console.log('Pathfind between ', previousRoom, ' and ', room);
+                // if (pathfindingPhase === 0 || pathfindingPhase === 1 || pathfindingPhase === 3) {
+                //     pathfindingMode(pathfindingPhase,'');
+                // }
+                // else if (pathfindingPhase === 2 || pathfindingPhase === 3) {
+                //     pathfindingMode(pathfindingPhase, room.ID);
+                // }
             } else {
                 // No room selected, so select this one:
                 selectRoomId(roomId);
@@ -239,7 +287,6 @@ function SPF(world, startID, endID) {
             }
             checking = newCheck.slice();
         }
-        console.log(solved);
         return solved;
     }
     else {

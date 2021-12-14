@@ -572,3 +572,15 @@ table {
 .room-info p {
     margin: 0;
 }
+
+#pathfinder-display p{
+    margin-bottom: 0;
+}
+
+#Pathfinder-selectS, #Pathfinder-selectE, #pathfinder-results {
+    display: none;
+}
+
+#Pathfinder-selectS.on, #Pathfinder-selectE.on, #pathfinder-results.on {
+    display: block;
+}
