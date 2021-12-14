@@ -157,7 +157,6 @@ for (const [key, value] of Object.entries(buttons)) {
     };
 }
 
-// Updates preview as input is changed, not used due to design choice for only one button to queue updates
 let worldChangedSincePreview = true;
 function inputChanged() {
     worldChangedSincePreview = true;

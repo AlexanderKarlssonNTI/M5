@@ -50,7 +50,7 @@ class WorldController extends Controller
                 foreach ($content->rooms[$i]->exits as $roomExit) {
                     $exits = new RoomExit;
                     $exits->room_id = $roomIds[$i];
-                    // Get database id for the room at the exit index: 
+                    // Get database id for the room at the exit index:
                     $exits->has_exit_to_room_id = $roomIds[$roomExit - 1];
                     $exits->save();
                 }
@@ -63,7 +63,7 @@ class WorldController extends Controller
     {
         $worlds = World::all();
         $worldInfo = [];
-        
+
         foreach ($worlds as $world) {
             $info = (object)[];
             $info->id = $world->id;
@@ -125,5 +125,18 @@ class WorldController extends Controller
         $content = $allContent->world;
 
         $world = World::findOrFail($worldId);
+
+        // Save room changes of world
+        $roomLength = count($content->rooms);
+        $roomIds = [];
+        for ($i = 0; $i < $roomLength; $i++) {
+            $room = Room::findOrFail($world->room->id);
+            $room->enterable = $content->rooms[$i]->canEnter;
+            $room->save();
+
+            array_push($roomIds, $room->id);
+        }
+
+        return response()->json($content);
     }
 }
