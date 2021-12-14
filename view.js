@@ -197,7 +197,7 @@ preview.addEventListener('click', function (e) {
 
 function showInfoAboutRoom(room) {
     document.getElementById('room-display-name').textContent = room.name;
-    document.getElementById('room-display-id').textContent = String(currentWorld.numberOfActiveRoomsBeforeRoom(room) + 1);
+    document.getElementById('room-display-id').textContent = room.ID;
     let exits = "";
     for (let i = 0; i < room.exits.length; i++) {
         if (i !== 0) {
