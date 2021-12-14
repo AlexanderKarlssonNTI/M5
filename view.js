@@ -3,7 +3,7 @@ const viewedWorldId = parseInt(urlParams.get('id'));
 console.log('viewed world id: ', viewedWorldId);
 
 let currentWorld = null;
-let updateCurrentUi = function() {};
+let updateCurrentUi = function () { };
 if (!isNaN(viewedWorldId)) {
     fetch('http://localhost:8000/api/worlds/' + viewedWorldId)
         .then(function (response) { return response.json(); })
@@ -19,6 +19,62 @@ if (!isNaN(viewedWorldId)) {
 }
 
 
+const editButton = document.getElementById("edit-btn");
+const pathfinderButton = document.getElementById("pathfinder-btn");
+
+const editButtonsSection = document.getElementById("edit-btns");
+
+const editRoomsButton = document.getElementById("btn-toggle-rooms");
+const editPathsButton = document.getElementById("btn-edit-paths");
+
+
+let currentlyEditing = false;
+function changeEditMode(shouldBeActive) {
+    shouldBeActive = Boolean(shouldBeActive);
+    if (currentlyEditing === shouldBeActive) return;
+
+    selectRoomId(null);
+    currentlyEditing = shouldBeActive;
+    if (isPathfinding) {
+        pathfinderButton.classList.remove('selected');
+        isPathfinding = false;
+    }
+
+    editButton.classList.toggle("off", shouldBeActive);
+    pathfinderButton.classList.toggle("off", shouldBeActive);
+    editButtonsSection.classList.toggle("on", shouldBeActive);
+}
+document.getElementById("save-btn").addEventListener("click", function () { changeEditMode(false); });
+document.getElementById("back-btn-edit").addEventListener("click", function () { changeEditMode(false); });
+
+
+let isPathfinding = false;
+pathfinderButton.addEventListener('click', function () {
+    isPathfinding = !isPathfinding;
+    selectRoomId(null);
+    pathfinderButton.classList.toggle('selected', isPathfinding);
+});
+
+
+const editModes = {
+    rooms: editRoomsButton,
+    paths: editPathsButton,
+};
+let currentEditMode = 'rooms';
+editModes[currentEditMode].classList.add('selected');
+
+for (const key of Object.keys(editModes)) {
+    editModes[key].addEventListener('click', function () {
+        if (currentEditMode === key) return;
+        selectRoomId(null);
+        editModes[currentEditMode].classList.remove('selected');
+        currentEditMode = key;
+        editModes[currentEditMode].classList.add('selected');
+    });
+}
+
+
+
 let currentlySelectedRoomId = null;
 function selectRoomId(roomId) {
     if (typeof roomId === 'number') {
@@ -26,9 +82,7 @@ function selectRoomId(roomId) {
         roomId = String(roomId);
     }
     if (currentlySelectedRoomId === roomId) {
-        // Already selected
-        selectRoomId(null);
-        return;
+        return false;
     }
     if (currentlySelectedRoomId !== null) {
         // Unselect old room.
@@ -43,16 +97,11 @@ function selectRoomId(roomId) {
         }
         currentlySelectedRoomId = roomId;
     }
+    return true;
 }
 
 
 const preview = document.getElementById('row-container');
-const editPathsButton = document.getElementById('btn-edit-paths');
-
-editPathsButton.addEventListener('click', function(e) {
-    
-});
-
 preview.addEventListener('click', function (e) {
     console.log("Preparing View");
     const roomId = e.target.getAttribute('data-room-id');
@@ -62,20 +111,105 @@ preview.addEventListener('click', function (e) {
         selectRoomId(null);
         return;
     }
-    selectRoomId(roomId);
     console.log("Room id valid");
     const room = currentWorld.rooms[roomId - 1];
 
-    //room.canEnter = !room.canEnter;
-    console.log("View done");
+    if (currentlyEditing) {
+        switch (currentEditMode) {
+            case 'rooms':
+                room.canEnter = !room.canEnter;
+                updateCurrentUi();
+                break;
 
-    updateCurrentUi();
-    console.log("Updating");
+            case 'paths':
+                if (currentlySelectedRoomId == roomId) {
+                    // Clicked on same room twice so just unselect:
+                    selectRoomId(null);
+                } else if (currentlySelectedRoomId !== null) {
+                    const selectedRoomId = currentlySelectedRoomId;
+                    // Toggle path
+                    selectRoomId(null);
+
+                    const previousRoomId = parseInt(selectedRoomId);
+                    if (isNaN(previousRoomId)) {
+                        console.error('invalid selected room id', selectedRoomId);
+                        return;
+                    }
+
+                    const previousRoom = currentWorld.rooms[previousRoomId - 1];
+
+                    if (previousRoom.hasExitTo(room)) {
+                        // Rooms are already connected, so disconnect them:
+                        previousRoom.disconnectFrom(room);
+                        updateCurrentUi();
+                    } else if (
+                        currentWorld.wrappingRoomLeftOf(previousRoom) === room ||
+                        currentWorld.wrappingRoomRightOf(previousRoom) === room ||
+                        currentWorld.wrappingRoomAboveOf(previousRoom) === room ||
+                        currentWorld.wrappingRoomBelowOf(previousRoom) === room
+                    ) {
+                        // Rooms are close, so connect them:
+                        previousRoom.connectTo(room);
+                        updateCurrentUi();
+                    } else {
+                        // Can't connect rooms far away from each other, so assume they want to select a different room:
+                        selectRoomId(roomId);
+                    }
+                } else {
+                    // No room selected, so select this one:
+                    selectRoomId(roomId);
+                }
+                break;
+        }
+    } else {
+        if (isPathfinding) {
+            if (currentlySelectedRoomId == roomId) {
+                // Clicked on same room twice so just unselect:
+                selectRoomId(null);
+            } else if (currentlySelectedRoomId !== null) {
+                const selectedRoomId = currentlySelectedRoomId;
+                selectRoomId(null);
+
+                const previousRoomId = parseInt(selectedRoomId);
+                if (isNaN(previousRoomId)) {
+                    console.error('invalid selected room id', selectedRoomId);
+                    return;
+                }
+
+                const previousRoom = currentWorld.rooms[previousRoomId - 1];
+
+                // TODO: handle pathfinding from `previousRoom` to `room`
+                console.log('Pathfind between ', previousRoom, ' and ', room);
+            } else {
+                // No room selected, so select this one:
+                selectRoomId(roomId);
+            }
+        } else {
+            if (!selectRoomId(roomId)) {
+                // Already selected:
+                selectRoomId(null);
+            } else {
+                showInfoAboutRoom(room);
+            }
+        }
+    }
 });
 
+function showInfoAboutRoom(room) {
+    document.getElementById('room-display-name').textContent = room.name;
+    document.getElementById('room-display-id').textContent = String(currentWorld.numberOfActiveRoomsBeforeRoom(room) + 1);
+    let exits = "";
+    for (let i = 0; i < room.exits.length; i++) {
+        if (i !== 0) {
+            exits += ',';
+        }
+        exits += room.exits[i];
+    }
+    document.getElementById('room-display-exits').textContent = exits;
+}
 
 function saveWorldEdits() {
-    
+
 }
 
 
