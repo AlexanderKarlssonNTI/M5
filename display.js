@@ -8,7 +8,7 @@ function showWorld(world, assumeBidirectionalPaths = false) {
     const updateFunctions = [];
 
     console.log("Start");
-    const totalRows = world.rooms.length / world.sideLength;
+    const totalRows = Math.ceil(world.rooms.length / world.sideLength);
     for (let row = 0; row < totalRows; row++) {
         // Spacer before each row:
 
@@ -41,18 +41,27 @@ function showWorld(world, assumeBidirectionalPaths = false) {
             const roomDiv = document.createElement('div');
             roomDiv.classList.add('room');
 
+            // Add room id attribute to more spacers (allows them to be clicked and do a "room" action)
+            let addRoomIdAttribute = function() {};
+
             const roomIndex = row * world.sideLength + i;
             if (roomIndex < world.rooms.length) {
                 const room = world.rooms[roomIndex];
                 console.log(room);
+
+                // Set room id attribute to allow click events to get a room id (allows "room" actions):
                 if (assumeBidirectionalPaths) {
                     roomDiv.setAttribute('data-room-id', room.ID);
                 } else {
                     for (const element of [roomDiv, spacerBefore, spacerAfter, spacerAbove, spacerBelow]) {
                         element.setAttribute('data-room-id', room.ID);
                     }
+                    addRoomIdAttribute = function(element) {
+                        element.setAttribute('data-room-id', room.ID);
+                    };
                 }
 
+                // Update UI with info about exits and "blocked" room:
                 const updateRoom = function () {
                     roomDiv.classList.toggle('blocked', !room.canEnter);
                     {
@@ -66,12 +75,12 @@ function showWorld(world, assumeBidirectionalPaths = false) {
                         spacerAfter.classList.toggle('has-path', roomRightOf);
                     }
                     {
-                        const roomAboveOf = room.hasExitTo(world.roomAboveOf(room));
+                        const roomAboveOf = room.hasExitTo(totalRows <= 2 ? world.roomAboveOf(room) : world.wrappingRoomAboveOf(room));
                         roomDiv.classList.toggle('path-to-above', roomAboveOf);
                         spacerAbove.classList.toggle('has-path', roomAboveOf);
                     }
                     {
-                        const roomBelowOf = room.hasExitTo(world.roomBelowOf(room));
+                        const roomBelowOf = room.hasExitTo(totalRows <= 2 ? world.roomBelowOf(room) : world.wrappingRoomBelowOf(room));
                         roomDiv.classList.toggle('path-to-below', roomBelowOf);
                         spacerBelow.classList.toggle('has-path', roomBelowOf);
                     }
@@ -90,12 +99,14 @@ function showWorld(world, assumeBidirectionalPaths = false) {
                     // Mimic layout of normal row div in row "spacer":
                     const spacer = document.createElement('div');
                     spacer.classList.add('spacer');
+                    addRoomIdAttribute(spacer);
                     rowSpacerAfter.appendChild(spacer);
                 }
                 {
                     // Mimic layout of normal row div in row "spacer":
                     const spacer = document.createElement('div');
                     spacer.classList.add('spacer');
+                    addRoomIdAttribute(spacer);
                     rowSpacerBefore.appendChild(spacer);
                 }
             }
@@ -111,12 +122,14 @@ function showWorld(world, assumeBidirectionalPaths = false) {
                 // Mimic layout of normal row div in row "spacer":
                 const spacer = document.createElement('div');
                 spacer.classList.add('spacer');
+                addRoomIdAttribute(spacer);
                 rowSpacerAfter.appendChild(spacer);
             }
             {
                 // Mimic layout of normal row div in row "spacer":
                 const spacer = document.createElement('div');
                 spacer.classList.add('spacer');
+                addRoomIdAttribute(spacer);
                 rowSpacerBefore.appendChild(spacer);
             }
         }
