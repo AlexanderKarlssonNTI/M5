@@ -58,19 +58,19 @@ preview.addEventListener('click', function (e) {
     const roomId = e.target.getAttribute('data-room-id');
     console.log(roomId);
     if (roomId === undefined || roomId === null) {
-        console.log("room ID invalid, didn't click on a room");
+        // console.log("room ID invalid, didn't click on a room");
         selectRoomId(null);
         return;
     }
     selectRoomId(roomId);
-    console.log("Room id valid");
+    // console.log("Room id valid");
     const room = currentWorld.rooms[roomId - 1];
 
     //room.canEnter = !room.canEnter;
-    console.log("View done");
+    // console.log("View done");
 
     updateCurrentUi();
-    console.log("Updating");
+    // console.log("Updating");
 });
 
 
