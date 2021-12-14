@@ -90,10 +90,12 @@ function selectRoomId(roomId) {
             element.classList.remove('selected');
         }
         currentlySelectedRoomId = null;
+        if (isPathfinding === false) document.getElementById('room-display').style.cssText='opacity: 0; cursor: default;';
     }
     if (roomId !== null) {
         for (const element of document.querySelectorAll(`.room[data-room-id="${roomId}"]`)) {
             element.classList.add('selected');
+            document.getElementById('room-display').style.cssText='opacity: 1; cursor: text;';
         }
         currentlySelectedRoomId = roomId;
     }
@@ -194,7 +196,7 @@ preview.addEventListener('click', function (e) {
         }
     }
 });
-
+// temp change for consistent exits and ID:s - String(currentWorld.numberOfActiveRoomsBeforeRoom(room) + 1)
 function showInfoAboutRoom(room) {
     document.getElementById('room-display-name').textContent = room.name;
     document.getElementById('room-display-id').textContent = room.ID;
@@ -208,8 +210,27 @@ function showInfoAboutRoom(room) {
     document.getElementById('room-display-exits').textContent = exits;
 }
 
-function saveWorldEdits() {
+editedWorld = World(currentWorld.room.canEnter.length, currentWorld.room.exits.length);
 
+function saveWorldEdits() {
+    let xhr = (window.XMLHttpRequest) ? new XMLHttpRequest() : new activeXObject("Microsoft.XMLHTTP");
+    xhr.open('put', 'http://localhost:8000/api/worlds/' + viewedWorldId, true);
+    xhr.send(JSON.stringify({
+        world: this.editedWorld,
+    }));
+
+    xhr.onreadystatechange = function () {
+        if (this.readyState == 4) {
+            if (this.status == 200) {
+                const createdInfo = JSON.parse(xhr.responseText);
+                console.log(createdInfo);
+                // Typical action to be performed when the document is ready:
+                console.log('OK');
+            } else {
+                console.error('Backend failed:\n', xhr.responseText);
+            }
+        }
+    };
 }
 
 
