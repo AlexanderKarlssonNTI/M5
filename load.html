@@ -11,13 +11,20 @@
             background-color: #959595;
         }
 
+        /* Hide long world names using "..." */
+        #world-name label,
+        #world-name,
+        #world-name-container {
+            max-width: 49.18vw;
+        }
         label {
             display: table-cell;
             margin-left: 0;
             white-space: nowrap;
             text-overflow: ellipsis;
             overflow: hidden;
-            max-width: 49.18vw;
+            min-height: 4vh;
+            max-height: 4vh;
         }
         input[type=checkbox] {
             /* border-width: 0px;
@@ -25,7 +32,7 @@
             padding: 0px;
             width: 0px;
             height: 0px; */
-            visibility: hidden;
+            display: none;
         }
 
         label.selected {
@@ -50,11 +57,17 @@
             <label># of rooms</label>
         </div>
         <div class="middle-row-load">
-            <div id="world-name" class="world-data-column">
+            <div id="world-name-container" class="world-data-column-container" style="flex: 3;">
+                <div id="world-name" class="world-data-column column-separator-right">
+                </div>
             </div>
-            <div id="world-type" class="world-data-column type-data">
+            <div class="world-data-column-container">
+                <div id="world-type" class="world-data-column column-separator-right">
+                </div>
             </div>
-            <div id="world-room-amount" class="world-data-column room-amount-data">
+            <div class="world-data-column-container">
+                <div id="world-room-amount" class="world-data-column">
+                </div>
             </div>
         </div>
         <div style="display: flex; flex-direction: row; justify-content: start;">
