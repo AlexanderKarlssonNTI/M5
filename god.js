@@ -270,6 +270,30 @@ class World {
         }
         return this.rooms[id - 1];
     }
+    wrappingRoomAboveOf(room) {
+        const nonWrapping = this.roomAboveOf(room);
+        if (nonWrapping === null) {
+            const rows = Math.ceil(this.rooms.length / this.sideLength);
+            // Skip all except last row + colum offset for specified room:
+            const id = (rows-1) * this.sideLength + ((room.ID - 1) % this.sideLength);
+            if (id >= this.rooms.length) {
+                return null;
+            }
+            return this.rooms[id];
+        } else {
+            return nonWrapping;
+        }
+    }
+    wrappingRoomBelowOf(room) {
+        const nonWrapping = this.roomBelowOf(room);
+        if (nonWrapping === null) {
+            // colum offset for specified room:
+            const id = (room.ID - 1) % this.sideLength;
+            return this.rooms[id];
+        } else {
+            return nonWrapping;
+        }
+    }
     roomLeftOf(room) {
         const id = room.ID - 1;
         if ((room.ID - 1) % this.sideLength == 0) {
@@ -308,5 +332,15 @@ class World {
         room.disconnectFrom(this.roomLeftOf(room));
         room.disconnectFrom(this.roomRightOf(room));
         room.canEnter = false;
+    }
+
+    numberOfActiveRoomsBeforeRoom(room) {
+        let count = 0;
+        for (let i = 0; i < (room.ID - 1); i++) {
+            if (this.rooms[i].canEnter) {
+                count++;
+            }
+        }
+        return count;
     }
 }

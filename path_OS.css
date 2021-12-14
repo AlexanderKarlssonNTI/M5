@@ -242,12 +242,23 @@ input::-webkit-inner-spin-button {
 }
 
 .middle-row-load {
-    align-items: unset;
+    align-items: stretch;
     border-style: solid;
     border:6px solid #000000;
     padding: 6px;
     background-color: var(--white);
     overflow: auto;
+}
+/* A div that allows flexing vertically */
+.middle-row-load > div {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+/* The actual column data container should grow vertically */
+.middle-row-load > div > div {
+    flex: 1;
 }
 
 .middle-row > .controls {
@@ -509,23 +520,16 @@ table {
     table-layout: fixed;
     width: 100%;
 }
-.world-data-column {
-    display: table;
-    table-layout: fixed;
-    width: 100%;
-    width: 52.5vw;
-    flex-direction: column;
-    display: flex;
-    text-align: center;
+.column-separator-right {
     border-right-style: dashed;
     border-color: #000000;
 }
-.type-data {
-    width: 19vw;
-}
-.room-amount-data {
-    width: 18.5vw;
-    border-style: none;
+.world-data-column {
+    display: table;
+    table-layout: fixed;
+    flex-direction: column;
+    display: flex;
+    text-align: center;
 }
 
 .edit-buttons > * {
@@ -551,7 +555,7 @@ table {
     text-align: center;
     background-color: var(--white);
     border: 4px solid #000000;
-    margin: 0 auto;
+    margin: 5px auto;
     padding: 0 5.6vw;
 }
 
