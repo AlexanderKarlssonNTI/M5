@@ -105,7 +105,7 @@ function pathfindingMode(phase,inputRoom) {
             }
         }
         roomHeaderDisplay.textContent = "Shortest path between "+pathfinderStart+" and "+pathfinderEnd+": \n"+shortestPath;
-        // for (const foundPath of document.querySelectorAll(`.room[data-room-id="${parseInt(shortestPath)}"]`)) {
+        // for (const foundPath of document.querySelectorAll(`.room[data-room-id="${shortestPath}"]`)) {
         //     foundPath.classList.add('found-path-highlighting');
         // }
         selectRoomId(null);
@@ -191,6 +191,18 @@ preview.addEventListener('click', function (e) {
         switch (currentEditMode) {
             case 'rooms':
                 room.canEnter = !room.canEnter;
+                // TODO: Investigate if and how it would be possible to only add whichever exits were removed from a specific room
+                if (room.canEnter === false) {
+                    currentWorld.roomAboveOf(room).disconnectFrom(room);
+                    currentWorld.roomBelowOf(room).disconnectFrom(room);
+                    currentWorld.roomLeftOf(room).disconnectFrom(room);
+                    currentWorld.roomRightOf(room).disconnectFrom(room);
+                } else if (room.canEnter === true) {
+                    currentWorld.roomAboveOf(room).connectTo(room);
+                    currentWorld.roomBelowOf(room).connectTo(room);
+                    currentWorld.roomLeftOf(room).connectTo(room);
+                    currentWorld.roomRightOf(room).connectTo(room);
+                }
                 updateCurrentUi();
                 break;
 
@@ -269,6 +281,7 @@ preview.addEventListener('click', function (e) {
 });
 // temp change for consistent exits and ID:s - String(currentWorld.numberOfActiveRoomsBeforeRoom(room) + 1)
 function showInfoAboutRoom(room) {
+    if (room.canEnter) {
     document.getElementById('room-display-name').textContent = room.name;
     document.getElementById('room-display-id').textContent = room.ID;
     let exits = "";
@@ -279,6 +292,10 @@ function showInfoAboutRoom(room) {
         exits += room.exits[i];
     }
     document.getElementById('room-display-exits').textContent = exits;
+    } else {
+        // Ensures that disabled rooms don't show any info display
+        roomInfoDisplay.style.visibility='hidden';
+    }
 }
 
 // editedWorld = World(currentWorld.room.canEnter.length, currentWorld.room.exits.length);
