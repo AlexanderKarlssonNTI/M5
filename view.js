@@ -27,6 +27,11 @@ const editButtonsSection = document.getElementById("edit-btns");
 const editRoomsButton = document.getElementById("btn-toggle-rooms");
 const editPathsButton = document.getElementById("btn-edit-paths");
 
+const roomInfoDisplay = document.getElementById('room-display');
+const roomHeaderDisplay = document.getElementById('room-display-name');
+const roomIdDisplay = document.getElementById('room-info-id');
+const roomExitsDisplay = document.getElementById('room-info-exits');
+
 
 let currentlyEditing = false;
 function changeEditMode(shouldBeActive) {
@@ -68,12 +73,18 @@ function pathfindingMode(phase,inputRoom) {
         // PathfinderSelectS.classList.toggle("on",true);
         // PathfinderSelectE.classList.toggle("on",false);
         // PathfinderResults.classList.toggle("on",false);
+        roomInfoDisplay.style.visibility='visible';
+        roomIdDisplay.style.display='none';
+        roomExitsDisplay.style.display='none';
+        roomHeaderDisplay.textContent = 'Select Start';
+        currentlySelectedRoomId = inputRoom;
         pathfindingPhase = 2;
     }
     else if (phase === 2){
         console.log("Phase 2")
         // PathfinderSelectS.classList.toggle("on",false);
         // PathfinderSelectE.classList.toggle("on",true);
+        roomHeaderDisplay.textContent = 'Select End';
         pathfinderStart = inputRoom;
         pathfindingPhase = 3;
     }
@@ -92,7 +103,10 @@ function pathfindingMode(phase,inputRoom) {
                 shortestPath = paths[x];
             }
         }
-        PathfinderResults.innerHTML = "Shortest path between "+pathfinderStart+" and "+pathfinderEnd+":<br />"+shortestPath;
+        roomHeaderDisplay.textContent = "Shortest path between "+pathfinderStart+" and "+pathfinderEnd+": \n"+shortestPath;
+        for (const foundPath of document.querySelectorAll(`.room[data-room-id="${roomId}"]`)) {
+            foundPath.classList.add('found-path-highlighting');
+        }
         selectRoomId(null);
         isPathfinding = !isPathfinding;
         pathfindingPhase = 1;
@@ -138,14 +152,22 @@ function selectRoomId(roomId) {
             element.classList.remove('selected');
         }
         currentlySelectedRoomId = null;
-        if (isPathfinding === false) document.getElementById('room-display').style.cssText='opacity: 0; cursor: default;';
+        if (isPathfinding === false) {
+        roomInfoDisplay.style.visibility='hidden';
+        roomIdDisplay.style.display='none';
+        roomExitsDisplay.style.display='none';
+        }
     }
     if (roomId !== null) {
         for (const element of document.querySelectorAll(`.room[data-room-id="${roomId}"]`)) {
             element.classList.add('selected');
-            document.getElementById('room-display').style.cssText='opacity: 1; cursor: text;';
         }
         currentlySelectedRoomId = roomId;
+        if (isPathfinding === false) {
+        roomInfoDisplay.style.visibility='visible';
+        roomIdDisplay.style.display='block';
+        roomExitsDisplay.style.display='block';
+        }
     }
     return true;
 }
@@ -258,7 +280,7 @@ function showInfoAboutRoom(room) {
     document.getElementById('room-display-exits').textContent = exits;
 }
 
-editedWorld = World(currentWorld.room.canEnter.length, currentWorld.room.exits.length);
+// editedWorld = World(currentWorld.room.canEnter.length, currentWorld.room.exits.length);
 
 function saveWorldEdits() {
     let xhr = (window.XMLHttpRequest) ? new XMLHttpRequest() : new activeXObject("Microsoft.XMLHTTP");
