@@ -64,9 +64,15 @@ pathfinderButton.addEventListener('click', function () {
 let pathfindingPhase = 1;
 let pathfinderStart;
 let pathfinderEnd;
+// let PathfinderSelectS = document.getElementById("Pathfinder-selectS");
+// let PathfinderSelectE = document.getElementById("Pathfinder-selectE");
+// let PathfinderResults = document.getElementById("Pathfinder-results");
 function pathfindingMode(phase,inputRoom) {
     if (phase === 1){
         console.log("Phase 1")
+        // PathfinderSelectS.classList.toggle("on",true);
+        // PathfinderSelectE.classList.toggle("on",false);
+        // PathfinderResults.classList.toggle("on",false);
         roomInfoDisplay.style.visibility='visible';
         roomIdDisplay.style.display='none';
         roomExitsDisplay.style.display='none';
@@ -76,6 +82,8 @@ function pathfindingMode(phase,inputRoom) {
     }
     else if (phase === 2){
         console.log("Phase 2")
+        // PathfinderSelectS.classList.toggle("on",false);
+        // PathfinderSelectE.classList.toggle("on",true);
         roomHeaderDisplay.textContent = 'Select End';
         pathfinderStart = inputRoom;
         selectRoomId(inputRoom);
@@ -83,6 +91,8 @@ function pathfindingMode(phase,inputRoom) {
     }
     else if (phase === 3){
         console.log("Phase 3")
+        // PathfinderSelectE.classList.toggle("on",false);
+        // PathfinderResults.classList.toggle("on",true);
         pathfinderEnd = inputRoom;
         let paths = [];
         if (currentWorld.type != "rectangle") {
