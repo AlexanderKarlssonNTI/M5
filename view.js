@@ -1,5 +1,7 @@
 const urlParams = new URLSearchParams(window.location.search);
 const viewedWorldId = parseInt(urlParams.get('id'));
+// const roomEntryStates;
+// const roomExits;
 console.log('viewed world id: ', viewedWorldId);
 
 let currentWorld = null;
@@ -93,6 +95,9 @@ function pathfindingMode(phase,inputRoom) {
         console.log("Phase 3")
         // PathfinderSelectE.classList.toggle("on",false);
         // PathfinderResults.classList.toggle("on",true);
+        
+        // roomPath.classlist.remove;
+        // spacerPath.classList.remove;
         pathfinderEnd = inputRoom;
         let paths = [];
         if (currentWorld.type != "rectangle") {
@@ -105,9 +110,15 @@ function pathfindingMode(phase,inputRoom) {
             }
         }
         roomHeaderDisplay.textContent = "Shortest path between "+pathfinderStart+" and "+pathfinderEnd+": \n"+shortestPath;
-        // for (const foundPath of document.querySelectorAll(`.room[data-room-id="${shortestPath}"]`)) {
-        //     foundPath.classList.add('found-path-highlighting');
-        // }
+        let shortestPathEntries = shortestPath.length;
+        for (let i = 0; i < shortestPathEntries; i++) {
+            for (const roomPath of document.querySelectorAll(`.room[data-room-id="${shortestPath[i]}"]`)) {
+                roomPath.classList.add('found-path-room-highlighting');
+            }
+            for (const spacerPath of document.querySelectorAll(`.has-path[data-room-id="${shortestPath[i]}"]`)) {
+                spacerPath.classList.add('found-path-spacer-highlighting');
+            }
+        }
         selectRoomId(null);
         isPathfinding = !isPathfinding;
         pathfindingPhase = 1;
@@ -191,18 +202,17 @@ preview.addEventListener('click', function (e) {
         switch (currentEditMode) {
             case 'rooms':
                 room.canEnter = !room.canEnter;
-                // TODO: Investigate if and how it would be possible to only add whichever exits were removed from a specific room
                 if (room.canEnter === false) {
-                    currentWorld.roomAboveOf(room).disconnectFrom(room);
-                    currentWorld.roomBelowOf(room).disconnectFrom(room);
-                    currentWorld.roomLeftOf(room).disconnectFrom(room);
-                    currentWorld.roomRightOf(room).disconnectFrom(room);
-                } else if (room.canEnter === true) {
-                    currentWorld.roomAboveOf(room).connectTo(room);
-                    currentWorld.roomBelowOf(room).connectTo(room);
-                    currentWorld.roomLeftOf(room).connectTo(room);
-                    currentWorld.roomRightOf(room).connectTo(room);
-                }
+                    currentWorld.wrappingRoomAboveOf(room).disconnectFrom(room);
+                    currentWorld.wrappingRoomBelowOf(room).disconnectFrom(room);
+                    currentWorld.wrappingRoomLeftOf(room).disconnectFrom(room);
+                    currentWorld.wrappingRoomRightOf(room).disconnectFrom(room);
+                } // else if (room.canEnter === true) {
+                //     currentWorld.wrappingRoomAboveOf(room).connectTo(room);
+                //     currentWorld.wrappingRoomBelowOf(room).connectTo(room);
+                //     currentWorld.wrappingRoomLeftOf(room).connectTo(room);
+                //     currentWorld.wrappingRoomRightOf(room).connectTo(room);
+                // }
                 updateCurrentUi();
                 break;
 
@@ -304,7 +314,7 @@ function saveWorldEdits() {
     let xhr = (window.XMLHttpRequest) ? new XMLHttpRequest() : new activeXObject("Microsoft.XMLHTTP");
     xhr.open('put', 'http://localhost:8000/api/worlds/' + viewedWorldId, true);
     xhr.send(JSON.stringify({
-        world: this.editedWorld,
+        world: currentWorld,
     }));
 
     xhr.onreadystatechange = function () {
