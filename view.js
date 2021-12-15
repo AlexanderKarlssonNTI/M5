@@ -64,20 +64,21 @@ pathfinderButton.addEventListener('click', function () {
 let pathfindingPhase = 1;
 let pathfinderStart;
 let pathfinderEnd;
-function pathfindingMode(phase,inputRoom,roomId) {
+function pathfindingMode(phase,inputRoom) {
     if (phase === 1){
         console.log("Phase 1")
         roomInfoDisplay.style.visibility='visible';
         roomIdDisplay.style.display='none';
         roomExitsDisplay.style.display='none';
         roomHeaderDisplay.textContent = 'Select Start';
-        currentlySelectedRoomId = inputRoom;
+        selectRoomId(inputRoom);
         pathfindingPhase = 2;
     }
     else if (phase === 2){
         console.log("Phase 2")
         roomHeaderDisplay.textContent = 'Select End';
         pathfinderStart = inputRoom;
+        selectRoomId(inputRoom);
         pathfindingPhase = 3;
     }
     else if (phase === 3){
@@ -94,9 +95,9 @@ function pathfindingMode(phase,inputRoom,roomId) {
             }
         }
         roomHeaderDisplay.textContent = "Shortest path between "+pathfinderStart+" and "+pathfinderEnd+": \n"+shortestPath;
-        for (const foundPath of document.querySelectorAll(`.room[data-room-id="${roomId}"]`)) {
-            foundPath.classList.add('found-path-highlighting');
-        }
+        // for (const foundPath of document.querySelectorAll(`.room[data-room-id="${parseInt(shortestPath)}"]`)) {
+        //     foundPath.classList.add('found-path-highlighting');
+        // }
         selectRoomId(null);
         isPathfinding = !isPathfinding;
         pathfindingPhase = 1;
