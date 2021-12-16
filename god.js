@@ -7,13 +7,13 @@ class Room {
     }
 
     Baptist() {
-        const adj = ["bloody","bleak","dark","clean","dirty","cozy","heavenly","hellish","beautiful","never-ending", "holy", "lovely","empty"];
-        const plc = ["hallway","room","corridor","toilet","kitchen","basement","bedroom", "dining room","garden","chapel","dining hall","bathroom"];
-        const dsc = ["death","despair","hopelessness","healing","horror","happiness","joy","bliss", "business","love","sin","virtue","hope","corruption"];
+        const adj = ["bloody", "bleak", "dark", "clean", "dirty", "cozy", "heavenly", "hellish", "beautiful", "never-ending", "holy", "lovely", "empty"];
+        const plc = ["hallway", "room", "corridor", "toilet", "kitchen", "basement", "bedroom", "dining room", "garden", "chapel", "dining hall", "bathroom"];
+        const dsc = ["death", "despair", "hopelessness", "healing", "horror", "happiness", "joy", "bliss", "business", "love", "sin", "virtue", "hope", "corruption"];
         let word1 = adj[Math.floor(Math.random() * adj.length)];
         let word2 = plc[Math.floor(Math.random() * plc.length)];
         let word3 = dsc[Math.floor(Math.random() * dsc.length)];
-        let fullName = "A "+word1+" "+word2+" of "+word3;
+        let fullName = "A " + word1 + " " + word2 + " of " + word3;
         return fullName;
     }
 
@@ -62,19 +62,19 @@ class World {
         this.type = Type;
         this.rooms = new Array;
         this.sideLength = new Number;
-        switch(Type) {
+        switch (Type) {
             case "circle":
                 this.generateCircleWorld(parameter1);
                 break;
             case "rectangle":
-                this.generateRectangleWorld(parameter1,parameter2);
+                this.generateRectangleWorld(parameter1, parameter2);
                 break;
             case "branch":
-                this.generateBranchWorld(parameter1,parameter2);
+                this.generateBranchWorld(parameter1, parameter2);
                 break;
             case "branch-alternative":
                 this.type = 'branch';
-                this.generateBranchWorldAlternative(parameter1,parameter2);
+                this.generateBranchWorldAlternative(parameter1, parameter2);
                 break;
             case "load":
                 this.load(parameter1);
@@ -104,14 +104,14 @@ class World {
         else if (nrOfRooms > 1) {
             this.rooms.push(new Room(1));
             this.sideLength = nrOfRooms;
-            for (let x = 1; x < nrOfRooms;x++) {
-                this.rooms.push(new Room(x+1));
-                this.rooms[x-1].exits.push(this.rooms[x].ID);
-                this.rooms[x].exits.push(this.rooms[x-1].ID);
+            for (let x = 1; x < nrOfRooms; x++) {
+                this.rooms.push(new Room(x + 1));
+                this.rooms[x - 1].exits.push(this.rooms[x].ID);
+                this.rooms[x].exits.push(this.rooms[x - 1].ID);
             }
             if (nrOfRooms != 2) {
                 this.rooms[0].exits.push(nrOfRooms);
-                this.rooms[nrOfRooms-1].exits.push(1);
+                this.rooms[nrOfRooms - 1].exits.push(1);
             }
         }
     }
@@ -123,26 +123,26 @@ class World {
 
         this.sideLength = length;
         this.rooms.push(new Room(1));
-        for (let x = 1; x < length;x++) {
-            this.rooms.push(new Room(x+1));
-            this.rooms[x-1].exits.push(this.rooms[x].ID);
-            this.rooms[x].exits.push(this.rooms[x-1].ID);
+        for (let x = 1; x < length; x++) {
+            this.rooms.push(new Room(x + 1));
+            this.rooms[x - 1].exits.push(this.rooms[x].ID);
+            this.rooms[x].exits.push(this.rooms[x - 1].ID);
         }
         for (let y = 1; y < height; y++) {
-            this.rooms.push(new Room(length*y+1));
-            for (let x = 1; x < length;x++) {
-                this.rooms.push(new Room(length*y+x+1));
-                this.rooms[length*y+x-1].exits.push(this.rooms[length*y+x].ID);
-                this.rooms[length*y+x].exits.push(this.rooms[length*y+x-1].ID);
+            this.rooms.push(new Room(length * y + 1));
+            for (let x = 1; x < length; x++) {
+                this.rooms.push(new Room(length * y + x + 1));
+                this.rooms[length * y + x - 1].exits.push(this.rooms[length * y + x].ID);
+                this.rooms[length * y + x].exits.push(this.rooms[length * y + x - 1].ID);
             }
-            for (let x = 1; x <= length;x++) {
-                this.rooms[length*y+x-1].exits.push(this.rooms[length*(y-1)+x-1].ID);
-                this.rooms[length*(y-1)+x-1].exits.push(this.rooms[length*y+x-1].ID);
+            for (let x = 1; x <= length; x++) {
+                this.rooms[length * y + x - 1].exits.push(this.rooms[length * (y - 1) + x - 1].ID);
+                this.rooms[length * (y - 1) + x - 1].exits.push(this.rooms[length * y + x - 1].ID);
             }
         }
     }
 
-    generateBranchWorld(mainbranch,factor) {
+    generateBranchWorld(mainbranch, factor) {
         if (factor >= 1 || isNaN(factor)) {
             console.error('Factor must be less than 1 but it was: ', factor);
             return;
@@ -152,24 +152,24 @@ class World {
             this.rooms.push(new Room(1));
         } else {
             this.rooms.push(new Room(1));
-            for (let x = 1; x < mainbranch;x++) {
-                this.rooms.push(new Room(x+1));
-                this.rooms[x-1].exits.push(this.rooms[x].ID);
-                this.rooms[x].exits.push(this.rooms[x-1].ID);
+            for (let x = 1; x < mainbranch; x++) {
+                this.rooms.push(new Room(x + 1));
+                this.rooms[x - 1].exits.push(this.rooms[x].ID);
+                this.rooms[x].exits.push(this.rooms[x - 1].ID);
             }
-            let childLength = Math.floor(mainbranch*factor);
+            let childLength = Math.floor(mainbranch * factor);
             let mainLength = this.rooms.length;
             while (childLength > 5) {
-                this.rooms.push(new Room(mainLength+1));
+                this.rooms.push(new Room(mainLength + 1));
                 // TODO: add empty rooms at the beginning and end of the row (with canEnter set to false).
-                for (let x = 1; x < childLength;x++) {
-                    this.rooms.push(new Room(mainLength+x+1));
-                    this.rooms[mainLength+x-1].exits.push(this.rooms[mainLength+x].ID);
-                    this.rooms[mainLength+x].exits.push(this.rooms[mainLength+x-1].ID);
+                for (let x = 1; x < childLength; x++) {
+                    this.rooms.push(new Room(mainLength + x + 1));
+                    this.rooms[mainLength + x - 1].exits.push(this.rooms[mainLength + x].ID);
+                    this.rooms[mainLength + x].exits.push(this.rooms[mainLength + x - 1].ID);
                 }
                 // TODO: connect first and last room to previous row
                 mainLength = this.rooms.length;
-                childLength = Math.floor(childLength*factor);
+                childLength = Math.floor(childLength * factor);
             }
         }
     }
@@ -191,10 +191,10 @@ class World {
         // Generate main branch:
         this.rooms.push(new Room(1));
         for (let x = 1; x < lengthOfMainBranch; x++) {
-            this.rooms.push(new Room(x+1));
+            this.rooms.push(new Room(x + 1));
 
-            this.rooms[x-1].exits.push(this.rooms[x].ID);
-            this.rooms[x].exits.push(this.rooms[x-1].ID);
+            this.rooms[x - 1].exits.push(this.rooms[x].ID);
+            this.rooms[x].exits.push(this.rooms[x - 1].ID);
         }
 
         // Generate child branches:
@@ -275,7 +275,7 @@ class World {
         if (nonWrapping === null) {
             const rows = Math.ceil(this.rooms.length / this.sideLength);
             // Skip all except last row + colum offset for specified room:
-            const id = (rows-1) * this.sideLength + ((room.ID - 1) % this.sideLength);
+            const id = (rows - 1) * this.sideLength + ((room.ID - 1) % this.sideLength);
             if (id >= this.rooms.length) {
                 return null;
             }
@@ -327,16 +327,81 @@ class World {
 
     blockRoom(room) {
         if (!room) return;
-        room.disconnectFrom(this.roomAboveOf(room));
-        room.disconnectFrom(this.roomBelowOf(room));
-        room.disconnectFrom(this.roomLeftOf(room));
-        room.disconnectFrom(this.roomRightOf(room));
+        room.disconnectFrom(this.wrappingRoomAboveOf(room));
+        room.disconnectFrom(this.wrappingRoomBelowOf(room));
+        room.disconnectFrom(this.wrappingRoomLeftOf(room));
+        room.disconnectFrom(this.wrappingRoomRightOf(room));
         room.canEnter = false;
     }
 
-    numberOfActiveRoomsBeforeRoom(room) {
+    getRoomById(roomId) {
+        switch (typeof roomId) {
+            case 'string':
+                roomId = parseInt(roomId);
+            case 'number':
+                if (isNaN(roomId)) {
+                    return null;
+                }
+                if (roomId < 1 || roomId > this.rooms.length) {
+                    return null;
+                }
+                return this.rooms[roomId - 1];
+            default:
+                return null;
+        }
+    }
+    getRoomByActiveRoomNumber(number) {
+        switch (typeof number) {
+            case 'string':
+                number = parseInt(number);
+            case 'number':
+                if (isNaN(number)) {
+                    return null;
+                }
+                if (number < 0) {
+                    return null;
+                }
+                break;
+            default:
+                return null;
+        }
+        let visibleCount = 0;
+        for (const room of this.rooms) {
+            if (room.canEnter) {
+                if (visibleCount === number) {
+                    return room;
+                }
+                visibleCount++;
+            }
+        }
+        return null;
+    }
+    activeRoomNumberForRoom(room) {
+        let roomId;
+        switch (typeof room) {
+            case 'object':
+                if (!room) {
+                    return null;
+                }
+                roomId = room.ID;
+                break;
+            case 'string':
+                room = parseInt(room);
+            case 'number':
+                if (isNaN(room)) {
+                    return null;
+                }
+                if (room < 0 || room > this.rooms.length) {
+                    return null;
+                }
+                roomId = room;
+                break;
+            default:
+                return null;
+        }
+
         let count = 0;
-        for (let i = 0; i < (room.ID - 1); i++) {
+        for (let i = 0; i < (roomId - 1); i++) {
             if (this.rooms[i].canEnter) {
                 count++;
             }
@@ -346,12 +411,45 @@ class World {
 }
 
 function WorldBaptist() {
-    const adj = ["","","","bloody","bleak","dark","clean","dirty","cozy","heavenly","hellish","beautiful","never-ending", "holy", "lovely","empty"];
+    const adj = ["", "", "", "bloody", "bleak", "dark", "clean", "dirty", "cozy", "heavenly", "hellish", "beautiful", "never-ending", "holy", "lovely", "empty"];
     // const plc = ["hallway","room","corridor","toilet","kitchen","basement","bedroom", "dining room","garden","chapel","dining hall","bathroom"];
-    const dsc = ["death","despair","hopelessness","healing","horror","happiness","joy","bliss", "business","love","sin","virtue","hope","corruption"];
+    const dsc = ["death", "despair", "hopelessness", "healing", "horror", "happiness", "joy", "bliss", "business", "love", "sin", "virtue", "hope", "corruption"];
     let word1 = adj[Math.floor(Math.random() * adj.length)];
     let word2 = plc[Math.floor(Math.random() * plc.length)];
     let word3 = dsc[Math.floor(Math.random() * dsc.length)];
-    let fullName = "A "+word1+" "+word2+" of "+word3;
+    let fullName = "A " + word1 + " " + word2 + " of " + word3;
     return fullName;
+}
+
+function SPF(world, startID, endID) {
+    if (startID > 0 && endID > 0 && startID <= world.rooms.length && endID <= world.rooms.length) {
+        let checking = [[startID]];
+        let solved = [];
+        while (checking.length > 0) {
+            let newCheck = [];
+            for (const path of checking) {
+                let lastroom = path[path.length - 1];
+                let exits = world.rooms[lastroom - 1].exits;
+                for (let i = 0; i < exits.length; i++) {
+                    let temp = [];
+                    let exit = world.rooms[lastroom - 1].exits[i];
+                    if (exit == endID) {
+                        temp = path.slice();
+                        temp.push(exit);
+                        solved.push(temp.slice());
+                    }
+                    else if (!path.includes(exit)) {
+                        temp = path.slice();
+                        temp.push(exit);
+                        newCheck.push(temp.slice());
+                    }
+                }
+            }
+            checking = newCheck.slice();
+        }
+        return solved;
+    }
+    else {
+        console.error("Invalid parameter/s");
+    }
 }
