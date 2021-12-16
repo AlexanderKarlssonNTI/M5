@@ -417,10 +417,10 @@ function WorldBaptist() {
     let word1 = adj[Math.floor(Math.random() * adj.length)];
     let word2 = plc[Math.floor(Math.random() * plc.length)];
     let word3 = dsc[Math.floor(Math.random() * dsc.length)];
-    if (Math.ceil(Math.random() * 2) = 1) {
+    if (Math.ceil(Math.random() * 2) === 1) {
         let fullName = "The " + word2 + " of " + word3;
         return fullName;
-    } else {
+    } else if (Math.ceil(Math.random() * 2) === 2){
         let fullName = "The " + word1 + " " + word2 + " of " + word3;
         return fullName;
     }
