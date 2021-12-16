@@ -42,12 +42,16 @@ function showWorld(world, assumeBidirectionalPaths = false) {
             roomDiv.classList.add('room');
 
             // Add room id attribute to more spacers (allows them to be clicked and do a "room" action)
-            let addRoomIdAttribute = function() {};
+            let addRoomIdAttribute = function () { };
 
             const roomIndex = row * world.sideLength + i;
             if (roomIndex < world.rooms.length) {
                 const room = world.rooms[roomIndex];
                 console.log(room);
+
+                for (const pathElement of [spacerBefore, spacerAfter, spacerAbove, spacerBelow]) {
+                    pathElement.setAttribute('data-path-from-room-id', room.ID);
+                }
 
                 // Set room id attribute to allow click events to get a room id (allows "room" actions):
                 if (assumeBidirectionalPaths) {
@@ -56,7 +60,7 @@ function showWorld(world, assumeBidirectionalPaths = false) {
                     for (const element of [roomDiv, spacerBefore, spacerAfter, spacerAbove, spacerBelow]) {
                         element.setAttribute('data-room-id', room.ID);
                     }
-                    addRoomIdAttribute = function(element) {
+                    addRoomIdAttribute = function (element) {
                         element.setAttribute('data-room-id', room.ID);
                     };
                 }
@@ -65,24 +69,40 @@ function showWorld(world, assumeBidirectionalPaths = false) {
                 const updateRoom = function () {
                     roomDiv.classList.toggle('blocked', !room.canEnter);
                     {
-                        let roomLeftOf = room.hasExitTo(world.sideLength <= 2 ? world.roomLeftOf(room) : world.wrappingRoomLeftOf(room));
+                        const targetRoom = world.sideLength <= 2 ? world.roomLeftOf(room) : world.wrappingRoomLeftOf(room);
+                        const roomLeftOf = room.hasExitTo(targetRoom);
                         roomDiv.classList.toggle('path-to-left', roomLeftOf);
                         spacerBefore.classList.toggle('has-path', roomLeftOf);
+                        if (targetRoom) {
+                            spacerBefore.setAttribute('data-path-to-room-id', targetRoom.ID);
+                        }
                     }
                     {
-                        let roomRightOf = room.hasExitTo(world.sideLength <= 2 ? world.roomRightOf(room) : world.wrappingRoomRightOf(room));
+                        const targetRoom = world.sideLength <= 2 ? world.roomRightOf(room) : world.wrappingRoomRightOf(room);
+                        const roomRightOf = room.hasExitTo(targetRoom);
                         roomDiv.classList.toggle('path-to-right', roomRightOf);
                         spacerAfter.classList.toggle('has-path', roomRightOf);
+                        if (targetRoom) {
+                            spacerAfter.setAttribute('data-path-to-room-id', targetRoom.ID);
+                        }
                     }
                     {
-                        const roomAboveOf = room.hasExitTo(totalRows <= 2 ? world.roomAboveOf(room) : world.wrappingRoomAboveOf(room));
+                        const targetRoom = totalRows <= 2 ? world.roomAboveOf(room) : world.wrappingRoomAboveOf(room);
+                        const roomAboveOf = room.hasExitTo(targetRoom);
                         roomDiv.classList.toggle('path-to-above', roomAboveOf);
                         spacerAbove.classList.toggle('has-path', roomAboveOf);
+                        if (targetRoom) {
+                            spacerAbove.setAttribute('data-path-to-room-id', targetRoom.ID);
+                        }
                     }
                     {
-                        const roomBelowOf = room.hasExitTo(totalRows <= 2 ? world.roomBelowOf(room) : world.wrappingRoomBelowOf(room));
+                        const targetRoom = totalRows <= 2 ? world.roomBelowOf(room) : world.wrappingRoomBelowOf(room);
+                        const roomBelowOf = room.hasExitTo(targetRoom);
                         roomDiv.classList.toggle('path-to-below', roomBelowOf);
                         spacerBelow.classList.toggle('has-path', roomBelowOf);
+                        if (targetRoom) {
+                            spacerBelow.setAttribute('data-path-to-room-id', targetRoom.ID);
+                        }
                     }
                 };
                 updateRoom();

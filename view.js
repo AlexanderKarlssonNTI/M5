@@ -1,5 +1,7 @@
 const urlParams = new URLSearchParams(window.location.search);
 const viewedWorldId = parseInt(urlParams.get('id'));
+// const roomEntryStates;
+// const roomExits;
 console.log('viewed world id: ', viewedWorldId);
 
 let currentWorld = null;
@@ -39,7 +41,9 @@ function changeEditMode(shouldBeActive) {
     shouldBeActive = Boolean(shouldBeActive);
     if (currentlyEditing === shouldBeActive) return;
 
+    pathfindingMode(1, null);
     selectRoomId(null);
+    showInfoAboutRoom(null);
     currentlyEditing = shouldBeActive;
     if (isPathfinding) {
         pathfinderButton.classList.remove('selected');
@@ -53,85 +57,6 @@ function changeEditMode(shouldBeActive) {
 document.getElementById("save-btn").addEventListener("click", function () { changeEditMode(false); });
 document.getElementById("back-btn-edit").addEventListener("click", function () { changeEditMode(false); });
 
-
-let isPathfinding = false;
-pathfinderButton.addEventListener('click', function () {
-    isPathfinding = !isPathfinding;
-    selectRoomId(null);
-    pathfinderCancel.classList.toggle("on",true);
-    pathfinderButton.classList.toggle("off",true);
-    pathfindingMode(pathfindingPhase,'');
-    // pathfinderButton.classList.toggle('selected', isPathfinding);
-});
-
-let pathfindingPhase = 1;
-let pathfinderStart;
-let pathfinderEnd;
-// let PathfinderSelectS = document.getElementById("Pathfinder-selectS");
-// let PathfinderSelectE = document.getElementById("Pathfinder-selectE");
-// let PathfinderResults = document.getElementById("Pathfinder-results");
-function pathfindingMode(phase,inputRoom) {
-    if (phase === 1){
-        console.log("Phase 1")
-        // PathfinderSelectS.classList.toggle("on",true);
-        // PathfinderSelectE.classList.toggle("on",false);
-        // PathfinderResults.classList.toggle("on",false);
-        roomInfoDisplay.style.visibility='visible';
-        roomIdDisplay.style.display='none';
-        roomExitsDisplay.style.display='none';
-        roomHeaderDisplay.textContent = 'Select Start';
-        currentlySelectedRoomId = inputRoom;
-        pathfindingPhase = 2;
-    }
-    else if (phase === 2){
-        console.log("Phase 2")
-        // PathfinderSelectS.classList.toggle("on",false);
-        // PathfinderSelectE.classList.toggle("on",true);
-        roomHeaderDisplay.textContent = 'Select End';
-        pathfinderStart = inputRoom;
-        pathfindingPhase = 3;
-    }
-    else if (phase === 3){
-        console.log("Phase 3")
-        // PathfinderSelectE.classList.toggle("on",false);
-        // PathfinderResults.classList.toggle("on",true);
-        pathfinderEnd = inputRoom;
-        let paths = [];
-        if (currentWorld.type != "rectangle") {
-            paths = SPF(currentWorld, pathfinderStart, pathfinderEnd);
-        } else if (currentWorld.type == "rectangle") {
-            paths = Dijkstra(currentWorld, pathfinderStart, pathfinderEnd);
-        }
-        let shortestPath = paths[0];
-        for (let x = 1; x<paths.length;x++) {
-            if (paths[x].length < shortestPath.length) {
-                shortestPath = paths[x];
-            }
-        }
-        roomHeaderDisplay.textContent = "Shortest path between "+pathfinderStart+" and "+pathfinderEnd+": \n"+shortestPath+": \nSelect new end";
-        // for (const foundPath of document.querySelectorAll(`.room[data-room-id="${roomId}"]`)) {
-        //     foundPath.classList.add('found-path-highlighting');
-        // }
-        // selectRoomId(null);
-        // isPathfinding = !isPathfinding;
-        pathfindingPhase = 3;
-        // pathfinderCancel.classList.toggle("on",false);
-        // pathfinderButton.classList.toggle("off",false);
-    }
-    else{
-        console.log("ERROR WITH PATHFINDING");
-    }
-}
-
-pathfinderCancel.addEventListener("click", function(){
-    if (isPathfinding == true) {
-        pathfindingPhase = 1;
-        roomInfoDisplay.style.visibility='hidden';
-        pathfinderCancel.classList.toggle("on",false);
-        pathfinderButton.classList.toggle("off",false);
-        isPathfinding = false;
-    }
-});
 
 const editModes = {
     rooms: editRoomsButton,
@@ -152,12 +77,188 @@ for (const key of Object.keys(editModes)) {
 
 
 
+
+let isPathfinding = false;
+pathfinderButton.addEventListener('click', function () {
+    isPathfinding = !isPathfinding;
+    selectRoomId(null);
+    pathfinderCancel.classList.toggle("on",true);
+    pathfinderButton.classList.toggle("off",true);
+    pathfindingMode(pathfindingPhase,'');
+    // pathfinderButton.classList.toggle('selected', isPathfinding);
+});
+
+let pathfindingPhase = 1;
+let pathfinderStart;
+let pathfinderEnd;
+let pathfindingIntervalId = null;
+let pathfindingAnimationTime = 1000;
+// let PathfinderSelectS = document.getElementById("Pathfinder-selectS");
+// let PathfinderSelectE = document.getElementById("Pathfinder-selectE");
+// let PathfinderResults = document.getElementById("Pathfinder-results");
+function pathfindingMode(phase, inputRoom) {
+
+    // Clear old paths:
+    if (pathfindingIntervalId !== null) {
+        clearInterval(pathfindingIntervalId);
+        pathfindingIntervalId = null;
+    }
+    const clearAllClasses = function(className) {
+        for (const element of Array.from(document.getElementsByClassName(className))) {
+            element.classList.remove(className);
+        }
+    };
+    clearAllClasses('found-path-room-highlighting');
+    clearAllClasses('found-path-spacer-highlighting');
+
+    showInfoAboutRoom(null);
+    if (isPathfinding) {
+        roomInfoDisplay.style.visibility = 'visible';
+    } else {
+        roomInfoDisplay.style.visibility = 'hidden';
+    }
+    if (phase === 1) {
+        console.log("Phase 1")
+        // PathfinderSelectS.classList.toggle("on",true);
+        // PathfinderSelectE.classList.toggle("on",false);
+        // PathfinderResults.classList.toggle("on",false);
+        roomIdDisplay.style.display = 'none';
+        roomExitsDisplay.style.display = 'none';
+        roomHeaderDisplay.textContent = 'Select Start';
+        selectRoomId(null);
+        pathfindingPhase = 2;
+    }
+    else if (phase === 2) {
+        console.log("Phase 2")
+        // PathfinderSelectS.classList.toggle("on",false);
+        // PathfinderSelectE.classList.toggle("on",true);
+        roomHeaderDisplay.textContent = 'Select End';
+        pathfinderStart = inputRoom;
+        selectRoomId(inputRoom);
+        pathfindingPhase = 3;
+    }
+    else if (phase === 3) {
+        console.log("Phase 3")
+        // PathfinderSelectE.classList.toggle("on",false);
+        // PathfinderResults.classList.toggle("on",true);
+
+        // roomPath.classlist.remove;
+        // spacerPath.classList.remove;
+        pathfinderEnd = inputRoom;
+        let paths = [];
+        if (currentWorld.type != "rectangle") {
+            paths = SPF(currentWorld, pathfinderStart, pathfinderEnd);
+        } else if (currentWorld.type == "rectangle") {
+            paths = Dijkstra(currentWorld, pathfinderStart, pathfinderEnd);
+        }
+        if (!paths) {
+            // there was an error
+            paths = [];
+        }
+        let shortestPath = paths[0];
+        for (let x = 1; x < paths.length; x++) {
+            if (paths[x].length < shortestPath.length) {
+                shortestPath = paths[x];
+            }
+        }
+        let shortestPathText = "doesn't exist";
+        if (shortestPath) {
+            shortestPathText = String(shortestPath.map(function(id) {
+                return currentWorld.activeRoomNumberForRoom(id);
+            }));
+        }
+        roomHeaderDisplay.textContent = "Shortest path between " +
+            currentWorld.activeRoomNumberForRoom(pathfinderStart) + " and " +
+            currentWorld.activeRoomNumberForRoom(pathfinderEnd) + ": \n" +
+            shortestPathText;
+
+        // Add new classes:
+        if (!shortestPath) {
+            shortestPath = [];
+        }
+
+        if (pathfindingAnimationTime > 0 && shortestPath.length > 1) {
+            // One step per room + 2 steps for paths between rooms - only one step for paths at end and start
+            let totalSteps = shortestPath.length * 3 - 2;
+
+            let minFrameTime = 1000 / 60;
+            let frameTime = pathfindingAnimationTime / totalSteps;
+            if (frameTime < minFrameTime) {
+                frameTime = minFrameTime;
+            }
+
+            let totalFrames = Math.ceil(pathfindingAnimationTime / frameTime);
+            let stepsPerFrame = Math.ceil(totalSteps / totalFrames);
+            let currentStep = 0;
+            const doStep = function() {
+                for (let i = 0; i < stepsPerFrame; i++) {
+                    let i = Math.floor((currentStep + 2) / 3);
+                    if (currentStep >= totalSteps || i >= shortestPath.length) {
+                        clearInterval(pathfindingIntervalId);
+                        pathfindingIntervalId = null;
+                        return;
+                    }
+                    switch (currentStep % 3) {
+                        case 0:
+                            // Activate room:
+                            for (const roomPath of document.querySelectorAll(`.room[data-room-id="${shortestPath[i]}"]`)) {
+                                roomPath.classList.add('found-path-room-highlighting');
+                            }
+                            break;
+                        case 1:
+                            // Activate path after room:
+                            for (const spacerPath of document.querySelectorAll(`.has-path[data-path-from-room-id="${shortestPath[i - 1]}"][data-path-to-room-id="${shortestPath[i]}"]`)) {
+                                spacerPath.classList.add('found-path-spacer-highlighting');
+                            }
+                            break;
+                        case 2:
+                            // Activate path before next room:
+                            for (const spacerPath of document.querySelectorAll(`.has-path[data-path-from-room-id="${shortestPath[i]}"][data-path-to-room-id="${shortestPath[i - 1]}"]`)) {
+                                spacerPath.classList.add('found-path-spacer-highlighting');
+                            }
+                            break;
+                    }
+
+                    currentStep++;
+                }
+            };
+            pathfindingIntervalId = setInterval(doStep, frameTime);
+            // Do first step immediately:
+            doStep();
+        } else {
+            for (let i = 0; i < shortestPath.length; i++) {
+                for (const roomPath of document.querySelectorAll(`.room[data-room-id="${shortestPath[i]}"]`)) {
+                    roomPath.classList.add('found-path-room-highlighting');
+                }
+                if (i !== 0) {
+                    for (const spacerPath of document.querySelectorAll(`.has-path[data-path-from-room-id="${shortestPath[i - 1]}"][data-path-to-room-id="${shortestPath[i]}"]`)) {
+                        spacerPath.classList.add('found-path-spacer-highlighting');
+                    }
+                    for (const spacerPath of document.querySelectorAll(`.has-path[data-path-from-room-id="${shortestPath[i]}"][data-path-to-room-id="${shortestPath[i - 1]}"]`)) {
+                        spacerPath.classList.add('found-path-spacer-highlighting');
+                    }
+                }
+            }
+        }
+    }
+    else {
+        console.log("ERROR WITH PATHFINDING");
+    }
+}
+
+
+
+
 let currentlySelectedRoomId = null;
 function selectRoomId(roomId) {
     if (typeof roomId === 'number') {
         // Make sure we don't mix numbers and strings.
         roomId = String(roomId);
     }
+    if (!roomId) {
+        roomId = null;
+    }
+
     if (currentlySelectedRoomId === roomId) {
         return false;
     }
@@ -167,22 +268,12 @@ function selectRoomId(roomId) {
             element.classList.remove('selected');
         }
         currentlySelectedRoomId = null;
-        if (isPathfinding === false) {
-        roomInfoDisplay.style.visibility='hidden';
-        roomIdDisplay.style.display='none';
-        roomExitsDisplay.style.display='none';
-        }
     }
     if (roomId !== null) {
         for (const element of document.querySelectorAll(`.room[data-room-id="${roomId}"]`)) {
             element.classList.add('selected');
         }
         currentlySelectedRoomId = roomId;
-        if (isPathfinding === false) {
-        roomInfoDisplay.style.visibility='visible';
-        roomIdDisplay.style.display='block';
-        roomExitsDisplay.style.display='block';
-        }
     }
     return true;
 }
@@ -192,10 +283,13 @@ const preview = document.getElementById('row-container');
 preview.addEventListener('click', function (e) {
     // console.log("Preparing View");
     const roomId = e.target.getAttribute('data-room-id');
-    console.log(roomId);
+    console.log('Clicked on: ', roomId);
     if (roomId === undefined || roomId === null) {
         // console.log("room ID invalid, didn't click on a room");
-        selectRoomId(null);
+        if (!isPathfinding) {
+            showInfoAboutRoom(null);
+            selectRoomId(null);
+        }
         return;
     }
     // console.log("Room id valid");
@@ -204,7 +298,11 @@ preview.addEventListener('click', function (e) {
     if (currentlyEditing) {
         switch (currentEditMode) {
             case 'rooms':
-                room.canEnter = !room.canEnter;
+                if (room.canEnter) {
+                    currentWorld.blockRoom(room);
+                } else {
+                    room.canEnter = true;
+                }
                 updateCurrentUi();
                 break;
 
@@ -223,10 +321,11 @@ preview.addEventListener('click', function (e) {
                         return;
                     }
 
-                    const previousRoom = currentWorld.rooms[previousRoomId - 1];
+                    const previousRoom = currentWorld.getRoomById(previousRoomId);
 
                     if (previousRoom.hasExitTo(room)) {
                         // Rooms are already connected, so disconnect them:
+                        console.log('pr', previousRoom, room);
                         previousRoom.disconnectFrom(room);
                         updateCurrentUi();
                     } else if (
@@ -250,31 +349,36 @@ preview.addEventListener('click', function (e) {
         }
     } else {
         if (isPathfinding) {
-            if (currentlySelectedRoomId !== null) {
-                switch(pathfindingPhase){
-                    case 2:
-                        pathfindingMode(2,room.ID);
-                        break;
-                    case 3:
-                        pathfindingMode(3,room.ID);
-                        break;
-                    default:
-                        pathfindingMode(1,'');
-                }
-                // if (pathfindingPhase === 0 || pathfindingPhase === 1 || pathfindingPhase === 3) {
-                //     pathfindingMode(pathfindingPhase,'');
-                // }
-                // else if (pathfindingPhase === 2 || pathfindingPhase === 3) {
-                //     pathfindingMode(pathfindingPhase, room.ID);
-                // }
-            } else {
-                // No room selected, so select this one:
-                selectRoomId(roomId);
+            if (String(roomId) === String(currentlySelectedRoomId)) {
+                // Choose a new starting point
+                pathfindingMode(1, null);
+                return;
             }
+            if (!room.canEnter) {
+                // Clicked on hidden room:
+                return;
+            }
+            switch (pathfindingPhase) {
+                case 2:
+                    pathfindingMode(2, room.ID);
+                    break;
+                case 3:
+                    pathfindingMode(3, room.ID);
+                    break;
+                default:
+                    pathfindingMode(1, '');
+            }
+            // if (pathfindingPhase === 0 || pathfindingPhase === 1 || pathfindingPhase === 3) {
+            //     pathfindingMode(pathfindingPhase,'');
+            // }
+            // else if (pathfindingPhase === 2 || pathfindingPhase === 3) {
+            //     pathfindingMode(pathfindingPhase, room.ID);
+            // }
         } else {
             if (!selectRoomId(roomId)) {
                 // Already selected:
                 selectRoomId(null);
+                showInfoAboutRoom(null);
             } else {
                 showInfoAboutRoom(room);
             }
@@ -283,16 +387,27 @@ preview.addEventListener('click', function (e) {
 });
 // temp change for consistent exits and ID:s - String(currentWorld.numberOfActiveRoomsBeforeRoom(room) + 1)
 function showInfoAboutRoom(room) {
-    document.getElementById('room-display-name').textContent = room.name;
-    document.getElementById('room-display-id').textContent = room.ID;
-    let exits = "";
-    for (let i = 0; i < room.exits.length; i++) {
-        if (i !== 0) {
-            exits += ',';
+    if (room && room.canEnter) {
+        roomInfoDisplay.style.visibility = 'visible';
+        roomIdDisplay.style.display = 'block';
+        roomExitsDisplay.style.display = 'block';
+
+        document.getElementById('room-display-name').textContent = room.name;
+        document.getElementById('room-display-id').textContent = currentWorld.activeRoomNumberForRoom(room);
+        let exits = "";
+        for (let i = 0; i < room.exits.length; i++) {
+            if (i !== 0) {
+                exits += ',';
+            }
+            exits += currentWorld.activeRoomNumberForRoom(room.exits[i]);
         }
-        exits += room.exits[i];
+        document.getElementById('room-display-exits').textContent = exits;
+    } else {
+        // Ensures that disabled rooms don't show any info display
+        roomInfoDisplay.style.visibility = 'hidden';
+        roomIdDisplay.style.display = 'none';
+        roomExitsDisplay.style.display = 'none';
     }
-    document.getElementById('room-display-exits').textContent = exits;
 }
 
 // editedWorld = World(currentWorld.room.canEnter.length, currentWorld.room.exits.length);
@@ -301,14 +416,12 @@ function saveWorldEdits() {
     let xhr = (window.XMLHttpRequest) ? new XMLHttpRequest() : new activeXObject("Microsoft.XMLHTTP");
     xhr.open('put', 'http://localhost:8000/api/worlds/' + viewedWorldId, true);
     xhr.send(JSON.stringify({
-        world: this.editedWorld,
+        world: currentWorld,
     }));
 
     xhr.onreadystatechange = function () {
         if (this.readyState == 4) {
             if (this.status == 200) {
-                const createdInfo = JSON.parse(xhr.responseText);
-                console.log(createdInfo);
                 // Typical action to be performed when the document is ready:
                 console.log('OK');
             } else {
@@ -318,64 +431,3 @@ function saveWorldEdits() {
     };
 }
 
-
-function SPF(world, startID, endID) {
-    if (startID > 0 && endID > 0 && startID < world.rooms.length && endID < world.rooms.length) {
-        let checking = [[startID]];
-        let solved = [];
-        while (checking.length > 0) {
-            let newCheck = [];
-            for (path of checking) {
-                let lastroom = path[path.length - 1];
-                let exits = world.rooms[lastroom - 1].exits;
-                for (let i = 0; i < exits.length; i++) {
-                    let temp = [];
-                    let exit = world.rooms[lastroom - 1].exits[i];
-                    if (exit == endID) {
-                        temp = path.slice();
-                        temp.push(exit);
-                        solved.push(temp.slice());
-                    }
-                    else if (!path.includes(exit)) {
-                        temp = path.slice();
-                        temp.push(exit);
-                        newCheck.push(temp.slice());
-                    }
-                }
-            }
-            checking = newCheck.slice();
-        }
-        return solved;
-    }
-    else {
-        console.log("Invalid parameter/s");
-    }
-}
-
-function Dijkstra(world, startID, endID) {
-    if (startID > 0 && endID > 0 && startID < world.rooms.length && endID < world.rooms.length) {
-        let visited = [];
-        let paths = [];
-        let checker = (arr, target) => target.every(Y => !arr.includes(Y));
-        for (let x = 0; x < world.rooms.length;x++) {
-            console.log("paths");
-            console.log(paths);
-            let tempExits = world.rooms[x].exits
-            for (exit in tempExits) {
-                let temp = [];
-                temp.push(world.rooms[x].ID);
-                temp.push(parseInt(exit));
-                console.log("temp");
-                console.log(temp);
-                for (let z = 0; z < temp.length;z++) {
-                    if (checker(paths[z],temp) == false && paths.length != 0) {
-                        paths.push(temp);
-                    }
-                }
-            }
-        }
-    }
-    else {
-        console.log("Invalid parameter/s");
-    }
-}

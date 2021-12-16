@@ -560,7 +560,12 @@ table {
     margin: 5px auto;
     padding: 0 1.5vw;
     min-width: 41.5vw;
+    max-width: 69vw;
+    max-height: 10vh;
+    /*min-height: 10vh;*/
     flex: 1 1 auto;
+    word-wrap: break-word;
+    overflow-y: auto;
 }
 
 #room-display.on {
@@ -599,8 +604,9 @@ table {
     display: block;
 } */
 
-.found-path-highlighting {
-    /*For testing*/
-    color: red;
-    background-color: red;
+div .found-path-room-highlighting {
+    background-color: var(--light-purple) !important;
+}
+div .found-path-spacer-highlighting {
+    background-color: var(--white) !important;
 }
