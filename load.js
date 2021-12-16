@@ -74,3 +74,10 @@ function deleteSelectedWorld(selectedWorld) {
         console.error('Failed to remove world:\n', error);
     })
 };
+
+function reshuffleName() {
+    for (const world of data.worlds == selectedWorld) {
+    document.getElementById('world-name').appendChild(world.name);
+    document.getElementById('world-name').textContent = WorldBaptist();
+    }
+}

@@ -40,6 +40,7 @@
             color: #ffffff;
         }
     </style>
+    <script type="text/javascript" src="god.js"></script>
     <script>
         // Start loading as soon as possible:
         const loadingAllWorlds = fetch('http://localhost:8000/api/load')
@@ -52,7 +53,7 @@
     <div class="content">
         <h1 class="title-load">Load</h1>
         <div class="top-row-load">
-            <label class="name-data-label">Name</label>
+            <label class="name-data-label">Title</label>
             <label class="type-data-label">Type</label>
             <label># of rooms</label>
         </div>
@@ -74,6 +75,7 @@
             <button class="btn-delete" onclick="deleteSelectedWorld(selectedWorld)">Delete</button>
             <button class="btn-back" onclick="window.location.href='view.html?id=' + selectedWorld">Load</button>
             <button class="btn-back" onclick="window.location.href='index.html'">Back</button>
+            <button class="btn-reshuffle" onclick="reshuffleName()">Reshuffle<br> Name</button>
         </div>
 
     </div>
