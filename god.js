@@ -493,33 +493,42 @@ function Dijkstra(world, startID, endID) {
         }
         for (path in pathways) {
             let temp;
-            if (checker(pathways[path],[startID])) {
+            if (checker(pathways[path],[startID]) === true) {
                 temp = pathways[path];
-                console.log(temp);
-                temp.slice(startID,1);
-                visited.push(temp[0]);
-                temp.push(startID);
-                console.log(temp);
-                paths.push(temp);
-                pathways.slice(pathways[path],1);
-                console.log(visited);
+                console.log(temp.indexOf(startID));
+                visited.push(temp[temp.indexOf(startID)-1]);
+                paths.push([startID,temp[temp.indexOf(startID)-1]]);
+                pathways.slice(pathways.indexOf(pathways[path]),1);
             }
         }
         console.log("Start");
         console.log(paths);
         let breaker = 0;
-        while (paths.length > 0) {
+        let exitFound = false;
+        while (paths.length > 0 && exitFound === false) {
             if (pathways.length == 0 || breaker == 10) {
                 break;
             }
-            for (path in pathways) {
-                let temp;
-                for (R in paths) {
-                    if (checker(paths[R],pathways[path])) {
-                        temp = path;
-                        temp.slice(startID,1);
-                        paths.push(temp);
-                        pathways.slice(paths,1);
+            for (currentPath in paths) {
+                for (path in pathways) {
+                    let temp;
+                    let snippet = paths[currentPath].slice(-2);
+                    console.log(snippet);
+                    if (checker(snippet,pathways[path]) === false) {
+                        console.log(temp);
+                        temp = snippet.slice(snippet.indexOf(paths[-1]),1);
+                        if (temp[0] == endID) {
+                            paths[currentPath].push(temp[0]);
+                            console.log(paths[currentPath]);
+                            exitFound = false;
+                            return paths[currentPath];
+                        } else if (checker(visited,temp) === false) {
+                            paths[currentPath].push(temp[0]);
+                            console.log(paths[currentPath]);
+                            visited.push(temp[0]);
+                            console.log(visited);
+                            pathways.slice(indexOf(pathways[path]),1);
+                        }
                     }
                 }
             }
