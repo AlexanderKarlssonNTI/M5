@@ -7,7 +7,6 @@ function showWorld(world, assumeBidirectionalPaths = false) {
     }
     const updateFunctions = [];
 
-    console.log("Start");
     const totalRows = Math.ceil(world.rooms.length / world.sideLength);
     for (let row = 0; row < totalRows; row++) {
         // Spacer before each row:
@@ -47,7 +46,6 @@ function showWorld(world, assumeBidirectionalPaths = false) {
             const roomIndex = row * world.sideLength + i;
             if (roomIndex < world.rooms.length) {
                 const room = world.rooms[roomIndex];
-                console.log(room);
 
                 for (const pathElement of [spacerBefore, spacerAfter, spacerAbove, spacerBelow]) {
                     pathElement.setAttribute('data-path-from-room-id', room.ID);
@@ -160,8 +158,6 @@ function showWorld(world, assumeBidirectionalPaths = false) {
         rowContainer.appendChild(rowDiv);
         rowContainer.appendChild(rowSpacerAfter);
     }
-
-    console.log("Show world done");
     // Return a function that updates the UI when called:
     return function () {
         for (const updateFunction of updateFunctions) {

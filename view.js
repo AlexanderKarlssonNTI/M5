@@ -2,7 +2,6 @@ const urlParams = new URLSearchParams(window.location.search);
 const viewedWorldId = parseInt(urlParams.get('id'));
 // const roomEntryStates;
 // const roomExits;
-console.log('viewed world id: ', viewedWorldId);
 
 let currentWorld = null;
 let updateCurrentUi = function () { };
@@ -10,7 +9,6 @@ if (!isNaN(viewedWorldId)) {
     fetch('http://localhost:8000/api/worlds/' + viewedWorldId)
         .then(function (response) { return response.json(); })
         .then(function (data) {
-            console.log(data);
             currentWorld = new World(data.name, 'load', data);
             document.getElementById('world-name').textContent = data.name;
             updateCurrentUi = showWorld(currentWorld);
@@ -88,6 +86,16 @@ pathfinderButton.addEventListener('click', function () {
     // pathfinderButton.classList.toggle('selected', isPathfinding);
 });
 
+pathfinderCancel.addEventListener("click", function(){
+    if (isPathfinding == true) {
+        pathfindingPhase = 1;
+        roomInfoDisplay.style.visibility='hidden';
+        pathfinderCancel.classList.toggle("on",false);
+        pathfinderButton.classList.toggle("off",false);
+        isPathfinding = false;
+    }
+});
+
 let pathfindingPhase = 1;
 let pathfinderStart;
 let pathfinderEnd;
@@ -118,7 +126,6 @@ function pathfindingMode(phase, inputRoom) {
         roomInfoDisplay.style.visibility = 'hidden';
     }
     if (phase === 1) {
-        console.log("Phase 1")
         // PathfinderSelectS.classList.toggle("on",true);
         // PathfinderSelectE.classList.toggle("on",false);
         // PathfinderResults.classList.toggle("on",false);
@@ -129,7 +136,6 @@ function pathfindingMode(phase, inputRoom) {
         pathfindingPhase = 2;
     }
     else if (phase === 2) {
-        console.log("Phase 2")
         // PathfinderSelectS.classList.toggle("on",false);
         // PathfinderSelectE.classList.toggle("on",true);
         roomHeaderDisplay.textContent = 'Select End';
@@ -138,7 +144,6 @@ function pathfindingMode(phase, inputRoom) {
         pathfindingPhase = 3;
     }
     else if (phase === 3) {
-        console.log("Phase 3")
         // PathfinderSelectE.classList.toggle("on",false);
         // PathfinderResults.classList.toggle("on",true);
 

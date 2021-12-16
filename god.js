@@ -459,27 +459,39 @@ function SPF(world, startID, endID) {
     }
 }
 
+
 function Dijkstra(world, startID, endID) {
     if (startID > 0 && endID > 0 && startID < world.rooms.length && endID < world.rooms.length) {
-        let visited = [];
+        let visited = [startID];
         let paths = [];
-        let checker = (arr, target) => target.every(Y => !arr.includes(Y));
-        for (let x = 0; x < world.rooms.length;x++) {
+        let checker = (arr, target) => target.every(Y => arr.includes(Y));
+        for (let n = 0; n < world.rooms[0].exits.length;n++) {
+            paths.push([world.rooms[0].ID,world.rooms[0].exits[n]]);
+        }
+        for (let x = 1; x < world.rooms.length;x++) {
             console.log("paths");
             console.log(paths);
-            let tempExits = world.rooms[x].exits
-            for (exit in tempExits) {
+            let tempExits = world.rooms[x].exits;
+            for (let y = 0; y < tempExits.length;y++) {
                 let temp = [];
                 temp.push(world.rooms[x].ID);
-                temp.push(parseInt(exit));
+                temp.push(parseInt(tempExits[y]));
                 console.log("temp");
                 console.log(temp);
-                for (let z = 0; z < temp.length;z++) {
-                    if (checker(paths[z],temp) == false && paths.length != 0) {
-                        paths.push(temp);
+                let matching = false;
+                for (let z = 0; z < paths.length;z++) {
+                    let tempy = checker(paths[z],temp);
+                    console.log(tempy);
+                    if (tempy != false) {
+                        matching = true;
                     }
                 }
+                if (matching === false) {
+                    paths.push(temp);
+                }
             }
+        }
+        while (paths.length > 0){
         }
     }
     else {
