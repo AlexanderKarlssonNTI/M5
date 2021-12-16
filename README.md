@@ -11,7 +11,7 @@
 |__|           |__|    |__|        |__|	       |__|   |__|       \ _______ /     \ ______ /
 ```
 # Introductory description
-Path Operating System is a web application which builds maps of connected entities in multiple variants and executes pathfinding algorithms to find paths between any two points on any map. All of this is visualized via a javascript generated, CSS flexed grid-like layout of HTML elements representing each room as well as the paths and spaces between them. This allows solid interactability and ease of appliance for styling of the display components. Maps, which can also be previewed during creation, are saved and accessible from a load menu. Changes made to the paths and nodes of maps can also be saved. As for the aesthetics, Path OS aims for a retro-look that explicitly is the Commodore 64.
+Path Operating System is a web application which builds maps of connected entities in multiple variants and executes pathfinding algorithms to find paths between any two points on any map. All of this is visualized via a javascript generated, CSS flexed grid-like layout of HTML elements representing each room as well as the paths and spaces between them. This allows solid interactability and ease of appliance for styling of the display components. Maps, which can be previewed during creation, are saved and accessible from a load menu. Changes made to the paths and rooms of maps can also be saved. As for the aesthetics, Path OS aims for a retro-look that explicitly is the Commodore 64.
 <br>
 <br>
 This program stores its map data by utilizing an API built in the PHP framework Laravel, therefore knowledge regarding how to work with it is relevant.
