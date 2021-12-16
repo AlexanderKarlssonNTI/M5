@@ -137,6 +137,10 @@ button.selected {
     margin-right: 6vw;
     width: 20vw;
 }
+.btn-reshuffle {
+    margin-left: 9.5vw;
+    font-size: 1.8vw;
+}
 
 #preview-btn {
     width: 20vw;
