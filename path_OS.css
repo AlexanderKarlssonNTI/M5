@@ -218,6 +218,16 @@ input::-webkit-inner-spin-button {
     margin-bottom: 1.5vh;
 }
 
+#btn-random-world-name {
+    height: 5vh;
+    font-size: 1vw;
+    width: 10vw;
+    margin: 0.1vw;
+    padding-left: 0.2vw;
+    /*border-width: 0.4vw;*/
+    border-width: 4px;
+}
+
 .top-row, .top-row-load {
     display: flex;
     flex-flow: row;
@@ -557,12 +567,13 @@ table {
     /*text-align: center;*/
     background-color: var(--white);
     border: 4px solid #000000;
-    margin: 5px auto;
+    /*margin: 5px auto;*/
+    margin: 3px auto;
     padding: 0 1.5vw;
     min-width: 41.5vw;
     max-width: 69vw;
     max-height: 10vh;
-    /*min-height: 10vh;*/
+    min-height: 9vh;
     flex: 1 1 auto;
     word-wrap: break-word;
     overflow-y: auto;

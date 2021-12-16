@@ -93,6 +93,18 @@ pathfinderCancel.addEventListener("click", function(){
         pathfinderCancel.classList.toggle("on",false);
         pathfinderButton.classList.toggle("off",false);
         isPathfinding = false;
+
+        // Clear old paths:
+        clearInterval(pathfindingIntervalId);
+        pathfindingIntervalId = null;
+    const clearAllClasses = function(className) {
+        for (const element of Array.from(document.getElementsByClassName(className))) {
+            element.classList.remove(className);
+        }
+    };
+    clearAllClasses('found-path-room-highlighting');
+    clearAllClasses('found-path-spacer-highlighting');
+    selectRoomId(null);
     }
 });
 
