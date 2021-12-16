@@ -463,36 +463,70 @@ function SPF(world, startID, endID) {
 function Dijkstra(world, startID, endID) {
     if (startID > 0 && endID > 0 && startID < world.rooms.length && endID < world.rooms.length) {
         let visited = [startID];
+        let pathways = [];
         let paths = [];
         let checker = (arr, target) => target.every(Y => arr.includes(Y));
         for (let n = 0; n < world.rooms[0].exits.length;n++) {
-            paths.push([world.rooms[0].ID,world.rooms[0].exits[n]]);
+            pathways.push([world.rooms[0].ID,world.rooms[0].exits[n]]);
         }
         for (let x = 1; x < world.rooms.length;x++) {
-            console.log("paths");
-            console.log(paths);
+            // console.log("pathway");
+            // console.log(pathways);
             let tempExits = world.rooms[x].exits;
             for (let y = 0; y < tempExits.length;y++) {
                 let temp = [];
                 temp.push(world.rooms[x].ID);
                 temp.push(parseInt(tempExits[y]));
-                console.log("temp");
-                console.log(temp);
+                // console.log("temp");
+                // console.log(temp);
                 let matching = false;
-                for (let z = 0; z < paths.length;z++) {
-                    let tempy = checker(paths[z],temp);
-                    console.log(tempy);
+                for (let z = 0; z < pathways.length;z++) {
+                    let tempy = checker(pathways[z],temp);
                     if (tempy != false) {
                         matching = true;
                     }
                 }
                 if (matching === false) {
-                    paths.push(temp);
+                    pathways.push(temp);
                 }
             }
         }
-        while (paths.length > 0){
+        for (path in pathways) {
+            let temp;
+            if (checker(pathways[path],[startID])) {
+                temp = pathways[path];
+                console.log(temp);
+                temp.slice(startID,1);
+                visited.push(temp[0]);
+                temp.push(startID);
+                console.log(temp);
+                paths.push(temp);
+                pathways.slice(pathways[path],1);
+                console.log(visited);
+            }
         }
+        console.log("Start");
+        console.log(paths);
+        let breaker = 0;
+        while (paths.length > 0) {
+            if (pathways.length == 0 || breaker == 10) {
+                break;
+            }
+            for (path in pathways) {
+                let temp;
+                for (R in paths) {
+                    if (checker(paths[R],pathways[path])) {
+                        temp = path;
+                        temp.slice(startID,1);
+                        paths.push(temp);
+                        pathways.slice(paths,1);
+                    }
+                }
+            }
+            console.log(paths);
+            breaker++;
+        }
+        console.log("End");
     }
     else {
         console.log("Invalid parameter/s");
