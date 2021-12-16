@@ -1,7 +1,5 @@
 const urlParams = new URLSearchParams(window.location.search);
 const viewedWorldId = parseInt(urlParams.get('id'));
-// const roomEntryStates;
-// const roomExits;
 
 let currentWorld = null;
 let updateCurrentUi = function () { };
@@ -426,8 +424,6 @@ function showInfoAboutRoom(room) {
         roomExitsDisplay.style.display = 'none';
     }
 }
-
-// editedWorld = World(currentWorld.room.canEnter.length, currentWorld.room.exits.length);
 
 function saveWorldEdits() {
     let xhr = (window.XMLHttpRequest) ? new XMLHttpRequest() : new activeXObject("Microsoft.XMLHTTP");
