@@ -8,6 +8,8 @@ const display = document.getElementById('row-container');
 const optionalSections = document.querySelectorAll('[data-require-world]');
 const rememberWorldType = document.getElementById('remember-world-type');
 
+const hiddenNameComparisonInput = document.getElementById('name-comparison');
+const randomizeWorldNameButton = document.getElementById('btn-random-world-name');
 
 const nameConfig = document.getElementById('world-name');
 const lengthConfig = document.getElementById('world-side-length');
@@ -38,6 +40,17 @@ function onWorldTypeChanged() {
 }
 onWorldTypeChanged();
 
+function randomizeWorldName() {
+    // hiddenNameComparisonInput.value = WorldBaptist();
+    nameConfig.value = WorldBaptist();
+    // while (nameConfig.value == hiddenNameComparisonInput.value) {
+    //     console.log('a');
+    //     hiddenNameComparisonInput.value = WorldBaptist();
+    //     if (nameConfig.value != hiddenNameComparisonInput.value) {
+    //         nameConfig.value = hiddenNameComparisonInput.value;
+    //     }
+    // }
+}
 
 let currentWorld = null;
 let updateCurrentUi = function () { };
@@ -49,8 +62,8 @@ const generateWorld = function (showAsWell = true) {
     if (nameConfig.value) {
         worldName = nameConfig.value;
     } else {
-        let room = new Room();
-        worldName = room.name;
+        let world = new World();
+        worldName = world.name;
     }
 
     let errorMessage = null;
