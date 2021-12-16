@@ -578,6 +578,15 @@ table {
     margin: 0;
 }
 
+#pathfinding-cancel{
+    display: none;
+}
+
+#pathfinding-cancel.on, #pathfinder-btn{
+    display: block;
+}
+
+
 /* #pathfinder-display p{
     margin-bottom: 0;
 }

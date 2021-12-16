@@ -21,6 +21,7 @@ if (!isNaN(viewedWorldId)) {
 
 const editButton = document.getElementById("edit-btn");
 const pathfinderButton = document.getElementById("pathfinder-btn");
+const pathfinderCancel = document.getElementById("pathfinding-cancel");
 
 const editButtonsSection = document.getElementById("edit-btns");
 
@@ -57,6 +58,8 @@ let isPathfinding = false;
 pathfinderButton.addEventListener('click', function () {
     isPathfinding = !isPathfinding;
     selectRoomId(null);
+    pathfinderCancel.classList.toggle("on",true);
+    pathfinderButton.classList.toggle("off",true);
     pathfindingMode(pathfindingPhase,'');
     // pathfinderButton.classList.toggle('selected', isPathfinding);
 });
@@ -96,6 +99,8 @@ function pathfindingMode(phase,inputRoom) {
         let paths = [];
         if (currentWorld.type != "rectangle") {
             paths = SPF(currentWorld, pathfinderStart, pathfinderEnd);
+        } else if (currentWorld.type == "rectangle") {
+            paths = Dijkstra(currentWorld, pathfinderStart, pathfinderEnd);
         }
         let shortestPath = paths[0];
         for (let x = 1; x<paths.length;x++) {
@@ -103,20 +108,30 @@ function pathfindingMode(phase,inputRoom) {
                 shortestPath = paths[x];
             }
         }
-        roomHeaderDisplay.textContent = "Shortest path between "+pathfinderStart+" and "+pathfinderEnd+": \n"+shortestPath;
-        for (const foundPath of document.querySelectorAll(`.room[data-room-id="${roomId}"]`)) {
-            foundPath.classList.add('found-path-highlighting');
-        }
-        selectRoomId(null);
-        isPathfinding = !isPathfinding;
-        pathfindingPhase = 1;
+        roomHeaderDisplay.textContent = "Shortest path between "+pathfinderStart+" and "+pathfinderEnd+": \n"+shortestPath+": \nSelect new end";
+        // for (const foundPath of document.querySelectorAll(`.room[data-room-id="${roomId}"]`)) {
+        //     foundPath.classList.add('found-path-highlighting');
+        // }
+        // selectRoomId(null);
+        // isPathfinding = !isPathfinding;
+        pathfindingPhase = 3;
+        // pathfinderCancel.classList.toggle("on",false);
+        // pathfinderButton.classList.toggle("off",false);
     }
     else{
         console.log("ERROR WITH PATHFINDING");
     }
 }
 
-
+pathfinderCancel.addEventListener("click", function(){
+    if (isPathfinding == true) {
+        pathfindingPhase = 1;
+        roomInfoDisplay.style.visibility='hidden';
+        pathfinderCancel.classList.toggle("on",false);
+        pathfinderButton.classList.toggle("off",false);
+        isPathfinding = false;
+    }
+});
 
 const editModes = {
     rooms: editRoomsButton,
@@ -331,6 +346,34 @@ function SPF(world, startID, endID) {
             checking = newCheck.slice();
         }
         return solved;
+    }
+    else {
+        console.log("Invalid parameter/s");
+    }
+}
+
+function Dijkstra(world, startID, endID) {
+    if (startID > 0 && endID > 0 && startID < world.rooms.length && endID < world.rooms.length) {
+        let visited = [];
+        let paths = [];
+        let checker = (arr, target) => target.every(Y => !arr.includes(Y));
+        for (let x = 0; x < world.rooms.length;x++) {
+            console.log("paths");
+            console.log(paths);
+            let tempExits = world.rooms[x].exits
+            for (exit in tempExits) {
+                let temp = [];
+                temp.push(world.rooms[x].ID);
+                temp.push(parseInt(exit));
+                console.log("temp");
+                console.log(temp);
+                for (let z = 0; z < temp.length;z++) {
+                    if (checker(paths[z],temp) == false && paths.length != 0) {
+                        paths.push(temp);
+                    }
+                }
+            }
+        }
     }
     else {
         console.log("Invalid parameter/s");
