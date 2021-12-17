@@ -25,6 +25,7 @@ const editButtonsSection = document.getElementById("edit-btns");
 
 const editRoomsButton = document.getElementById("btn-toggle-rooms");
 const editPathsButton = document.getElementById("btn-edit-paths");
+const editSmartButton = document.getElementById("btn-edit-smart");
 
 const roomInfoDisplay = document.getElementById('room-display');
 const roomHeaderDisplay = document.getElementById('room-display-name');
@@ -37,13 +38,13 @@ function changeEditMode(shouldBeActive) {
     shouldBeActive = Boolean(shouldBeActive);
     if (currentlyEditing === shouldBeActive) return;
 
-    pathfindingMode(1, null);
     selectRoomId(null);
     showInfoAboutRoom(null);
     currentlyEditing = shouldBeActive;
     if (isPathfinding) {
-        pathfinderButton.classList.remove('selected');
         isPathfinding = false;
+        currentPathfindingPhase = 1;
+        pathfindingMode();
     }
 
     editButton.classList.toggle("off", shouldBeActive);
@@ -57,6 +58,7 @@ document.getElementById("back-btn-edit").addEventListener("click", function () {
 const editModes = {
     rooms: editRoomsButton,
     paths: editPathsButton,
+    smart: editSmartButton,
 };
 let currentEditMode = 'rooms';
 editModes[currentEditMode].classList.add('selected');
@@ -76,37 +78,19 @@ for (const key of Object.keys(editModes)) {
 
 let isPathfinding = false;
 pathfinderButton.addEventListener('click', function () {
-    isPathfinding = !isPathfinding;
-    selectRoomId(null);
-    pathfinderCancel.classList.toggle("on",true);
-    pathfinderButton.classList.toggle("off",true);
-    pathfindingMode(pathfindingPhase,'');
+    isPathfinding = true;
+    currentPathfindingPhase = 1;
+    pathfindingMode();
     // pathfinderButton.classList.toggle('selected', isPathfinding);
 });
 
-pathfinderCancel.addEventListener("click", function(){
-    if (isPathfinding == true) {
-        pathfindingPhase = 1;
-        roomInfoDisplay.style.visibility='hidden';
-        pathfinderCancel.classList.toggle("on",false);
-        pathfinderButton.classList.toggle("off",false);
-        isPathfinding = false;
-
-        // Clear old paths:
-        clearInterval(pathfindingIntervalId);
-        pathfindingIntervalId = null;
-    const clearAllClasses = function(className) {
-        for (const element of Array.from(document.getElementsByClassName(className))) {
-            element.classList.remove(className);
-        }
-    };
-    clearAllClasses('found-path-room-highlighting');
-    clearAllClasses('found-path-spacer-highlighting');
-    selectRoomId(null);
-    }
+pathfinderCancel.addEventListener("click", function () {
+    isPathfinding = false;
+    currentPathfindingPhase = 1;
+    pathfindingMode();
 });
 
-let pathfindingPhase = 1;
+let currentPathfindingPhase = 1;
 let pathfinderStart;
 let pathfinderEnd;
 let pathfindingIntervalId = null;
@@ -114,14 +98,14 @@ let pathfindingAnimationTime = 1000;
 // let PathfinderSelectS = document.getElementById("Pathfinder-selectS");
 // let PathfinderSelectE = document.getElementById("Pathfinder-selectE");
 // let PathfinderResults = document.getElementById("Pathfinder-results");
-function pathfindingMode(phase, inputRoom) {
+function pathfindingMode(inputRoom = null) {
 
     // Clear old paths:
     if (pathfindingIntervalId !== null) {
         clearInterval(pathfindingIntervalId);
         pathfindingIntervalId = null;
     }
-    const clearAllClasses = function(className) {
+    const clearAllClasses = function (className) {
         for (const element of Array.from(document.getElementsByClassName(className))) {
             element.classList.remove(className);
         }
@@ -129,13 +113,21 @@ function pathfindingMode(phase, inputRoom) {
     clearAllClasses('found-path-room-highlighting');
     clearAllClasses('found-path-spacer-highlighting');
 
+
+    // Make sure UI is in the correct state:
     showInfoAboutRoom(null);
+
+    pathfinderCancel.classList.toggle("on", isPathfinding);
+    pathfinderButton.classList.toggle("off", isPathfinding);
     if (isPathfinding) {
         roomInfoDisplay.style.visibility = 'visible';
     } else {
         roomInfoDisplay.style.visibility = 'hidden';
     }
-    if (phase === 1) {
+
+
+    // Do pathfinding stuff:
+    if (currentPathfindingPhase === 1) {
         // PathfinderSelectS.classList.toggle("on",true);
         // PathfinderSelectE.classList.toggle("on",false);
         // PathfinderResults.classList.toggle("on",false);
@@ -143,49 +135,49 @@ function pathfindingMode(phase, inputRoom) {
         roomExitsDisplay.style.display = 'none';
         roomHeaderDisplay.textContent = 'Select Start';
         selectRoomId(null);
-        pathfindingPhase = 2;
+        currentPathfindingPhase = 2;
     }
-    else if (phase === 2) {
+    else if (currentPathfindingPhase === 2) {
         // PathfinderSelectS.classList.toggle("on",false);
         // PathfinderSelectE.classList.toggle("on",true);
         roomHeaderDisplay.textContent = 'Select End';
         pathfinderStart = inputRoom;
         selectRoomId(inputRoom);
-        pathfindingPhase = 3;
+        currentPathfindingPhase = 3;
     }
-    else if (phase === 3) {
+    else if (currentPathfindingPhase === 3) {
         // PathfinderSelectE.classList.toggle("on",false);
         // PathfinderResults.classList.toggle("on",true);
 
         // roomPath.classlist.remove;
         // spacerPath.classList.remove;
         pathfinderEnd = inputRoom;
-        let paths = [];
-        if (currentWorld.type != "rectangle") {
-            paths = SPF(currentWorld, pathfinderStart, pathfinderEnd);
-        } else if (currentWorld.type == "rectangle") {
-            paths = Dijkstra(currentWorld, pathfinderStart, pathfinderEnd);
-        }
-        if (!paths) {
-            // there was an error
-            paths = [];
-        }
-        let shortestPath = paths[0];
-        for (let x = 1; x < paths.length; x++) {
-            if (paths[x].length < shortestPath.length) {
-                shortestPath = paths[x];
+        let shortestPath = null;
+        if (currentWorld.type != "rectangle" && false) {
+            let paths = SPF(currentWorld, pathfinderStart, pathfinderEnd);
+            if (!paths) {
+                // there was an error
+                paths = [];
             }
+            shortestPath = paths[0];
+            for (let x = 1; x < paths.length; x++) {
+                if (paths[x].length < shortestPath.length) {
+                    shortestPath = paths[x];
+                }
+            }
+        } else {
+            shortestPath = DijkstraAlternative(currentWorld, pathfinderStart, pathfinderEnd);
         }
         let shortestPathText = "doesn't exist";
         if (shortestPath) {
-            shortestPathText = String(shortestPath.map(function(id) {
-                return currentWorld.activeRoomNumberForRoom(id);
+            shortestPathText = String(shortestPath.map(function (id) {
+                return currentWorld.activeRoomNumberForRoom(id) + 1;
             }));
         }
         roomHeaderDisplay.textContent = "Shortest path between " +
-            currentWorld.activeRoomNumberForRoom(pathfinderStart) + " and " +
-            currentWorld.activeRoomNumberForRoom(pathfinderEnd) + ": \n" +
-            shortestPathText;
+            String(currentWorld.activeRoomNumberForRoom(pathfinderStart) + 1) + " and " +
+            String(currentWorld.activeRoomNumberForRoom(pathfinderEnd) + 1) + ": \n" +
+            shortestPathText + "\n Select another end or the start to continue";
 
         // Add new classes:
         if (!shortestPath) {
@@ -205,7 +197,7 @@ function pathfindingMode(phase, inputRoom) {
             let totalFrames = Math.ceil(pathfindingAnimationTime / frameTime);
             let stepsPerFrame = Math.ceil(totalSteps / totalFrames);
             let currentStep = 0;
-            const doStep = function() {
+            const doStep = function () {
                 for (let i = 0; i < stepsPerFrame; i++) {
                     let i = Math.floor((currentStep + 2) / 3);
                     if (currentStep >= totalSteps || i >= shortestPath.length) {
@@ -326,9 +318,9 @@ preview.addEventListener('click', function (e) {
                     // Clicked on same room twice so just unselect:
                     selectRoomId(null);
                 } else if (currentlySelectedRoomId !== null) {
-                    const selectedRoomId = currentlySelectedRoomId;
                     // Toggle path
-                    selectRoomId(null);
+                    const selectedRoomId = currentlySelectedRoomId;
+                    selectRoomId(roomId);
 
                     const previousRoomId = parseInt(selectedRoomId);
                     if (isNaN(previousRoomId)) {
@@ -343,12 +335,7 @@ preview.addEventListener('click', function (e) {
                         console.log('pr', previousRoom, room);
                         previousRoom.disconnectFrom(room);
                         updateCurrentUi();
-                    } else if (
-                        currentWorld.wrappingRoomLeftOf(previousRoom) === room ||
-                        currentWorld.wrappingRoomRightOf(previousRoom) === room ||
-                        currentWorld.wrappingRoomAboveOf(previousRoom) === room ||
-                        currentWorld.wrappingRoomBelowOf(previousRoom) === room
-                    ) {
+                    } else if (currentWorld.isWrappingNeighbors(previousRoom, room)) {
                         // Rooms are close, so connect them:
                         previousRoom.connectTo(room);
                         updateCurrentUi();
@@ -366,29 +353,15 @@ preview.addEventListener('click', function (e) {
         if (isPathfinding) {
             if (String(roomId) === String(currentlySelectedRoomId)) {
                 // Choose a new starting point
-                pathfindingMode(1, null);
+                currentPathfindingPhase = 1;
+                pathfindingMode();
                 return;
             }
             if (!room.canEnter) {
                 // Clicked on hidden room:
                 return;
             }
-            switch (pathfindingPhase) {
-                case 2:
-                    pathfindingMode(2, room.ID);
-                    break;
-                case 3:
-                    pathfindingMode(3, room.ID);
-                    break;
-                default:
-                    pathfindingMode(1, '');
-            }
-            // if (pathfindingPhase === 0 || pathfindingPhase === 1 || pathfindingPhase === 3) {
-            //     pathfindingMode(pathfindingPhase,'');
-            // }
-            // else if (pathfindingPhase === 2 || pathfindingPhase === 3) {
-            //     pathfindingMode(pathfindingPhase, room.ID);
-            // }
+            pathfindingMode(room.ID);
         } else {
             if (!selectRoomId(roomId)) {
                 // Already selected:
@@ -400,6 +373,70 @@ preview.addEventListener('click', function (e) {
         }
     }
 });
+
+let lastMouseEvent = null;
+let lastMouseRoomId = null;
+function mouseMove(e) {
+    let didChange = false;
+    if (e.target) {
+        const roomId = e.target.getAttribute('data-room-id');
+        if (roomId) {
+            const room = currentWorld.getRoomById(roomId);
+            if (!room.canEnter) {
+                room.canEnter = true;
+                didChange = true;
+            }
+            if (lastMouseRoomId !== null) {
+                const lastRoom = currentWorld.getRoomById(lastMouseRoomId);
+                if (!lastRoom.hasExitTo(room) && currentWorld.isWrappingNeighbors(lastRoom, room)) {
+                    lastRoom.connectTo(room);
+                    didChange = true;
+                }
+            }
+            lastMouseRoomId = roomId;
+        }
+    }
+    if (didChange) {
+        updateCurrentUi();
+    }
+
+
+    lastMouseEvent = e;
+}
+function stopDrag(cancel = true) {
+    // If !cancel then maybe do something special?
+    lastMouseEvent = null;
+    lastMouseRoomId = null;
+    preview.removeEventListener('mouseover', mouseMove);
+}
+preview.addEventListener('mousedown', function (e) {
+    // By default a mousedown event enables drag and drop, but we don't want it so disable it:
+    e.preventDefault ? e.preventDefault() : e.returnValue = false;
+
+    if (!currentlyEditing) return;
+    if (currentEditMode !== 'smart') return;
+
+    stopDrag();
+    mouseMove(e);
+    preview.addEventListener('mouseover', mouseMove, {bubble: true});
+});
+document.addEventListener('mouseup', function (e) {
+    // console.log('mouse button up', e);
+    // If not left mouse button then cancel current drag operation:
+    stopDrag(e.buttons % 2 !== 0);
+});
+document.addEventListener('keydown', function (e) {
+    // console.log('key down', e);
+    if (e.key === 'Escape') {
+        stopDrag();
+    }
+});
+document.addEventListener('blur', function (e) {
+    // console.log('document lost focus', e);
+    stopDrag();
+});
+
+
 // temp change for consistent exits and ID:s - String(currentWorld.numberOfActiveRoomsBeforeRoom(room) + 1)
 function showInfoAboutRoom(room) {
     if (room && room.canEnter) {
@@ -408,13 +445,13 @@ function showInfoAboutRoom(room) {
         roomExitsDisplay.style.display = 'block';
 
         document.getElementById('room-display-name').textContent = room.name;
-        document.getElementById('room-display-id').textContent = currentWorld.activeRoomNumberForRoom(room);
+        document.getElementById('room-display-id').textContent = String(currentWorld.activeRoomNumberForRoom(room) + 1);
         let exits = "";
         for (let i = 0; i < room.exits.length; i++) {
             if (i !== 0) {
                 exits += ',';
             }
-            exits += currentWorld.activeRoomNumberForRoom(room.exits[i]);
+            exits += String(currentWorld.activeRoomNumberForRoom(room.exits[i]) + 1);
         }
         document.getElementById('room-display-exits').textContent = exits;
     } else {
