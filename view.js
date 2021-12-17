@@ -17,6 +17,9 @@ if (!isNaN(viewedWorldId)) {
 }
 
 
+const worldNameLabel = document.getElementById('world-name');
+const worldNameInput = document.getElementById('world-name-edit');
+
 const editButton = document.getElementById("edit-btn");
 const pathfinderButton = document.getElementById("pathfinder-btn");
 const pathfinderCancel = document.getElementById("pathfinding-cancel");
@@ -26,12 +29,73 @@ const editButtonsSection = document.getElementById("edit-btns");
 const editRoomsButton = document.getElementById("btn-toggle-rooms");
 const editPathsButton = document.getElementById("btn-edit-paths");
 const editSmartButton = document.getElementById("btn-edit-smart");
+const editEraserButton = document.getElementById("btn-eraser");
 
 const roomInfoDisplay = document.getElementById('room-display');
 const roomHeaderDisplay = document.getElementById('room-display-name');
 const roomIdDisplay = document.getElementById('room-info-id');
 const roomExitsDisplay = document.getElementById('room-info-exits');
 
+
+let isEditingTitle = false;
+function enterTitleEdit() {
+    isEditingTitle = true;
+    for (const header of Array.from(document.getElementsByClassName('world-header'))) {
+        header.classList.add('editing-name');
+    }
+    worldNameInput.value = currentWorld.name;
+    worldNameInput.select();
+    worldNameInput.focus();
+}
+
+function exitTitleEdit() {
+    isEditingTitle = false;
+    for (const header of Array.from(document.getElementsByClassName('world-header'))) {
+        header.classList.remove('editing-name');
+    }
+}
+function setWorldName(newName) {
+    currentWorld.name = newName;
+    worldNameLabel.textContent = newName;
+}
+
+worldNameLabel.addEventListener('click', function (e) {
+    if (e.button == 0) {
+        enterTitleEdit();
+        e.stopPropagation();
+    }
+})
+worldNameInput.addEventListener('keydown', function(event) {
+    if (!isEditingTitle) return;
+
+    // Inspired by code at:
+    // https://github.com/piroor/treestyletab/blob/ef38e94026bbeaf4f83e8e4d04321f5eba540b6a/webextensions/resources/group-tab.js#L144
+
+    // Event.isComposing for the Enter key to finish composition is always
+    // "false" on keyup, so we need to handle this on keydown.
+    if (event.isComposing)
+        return;
+
+    switch (event.key) {
+        case 'Escape':
+            exitTitleEdit();
+            break;
+
+        case 'Enter':
+            setWorldName(worldNameInput.value);
+            exitTitleEdit();
+            break;
+    }
+});
+document.addEventListener('click', function (e) {
+    if (!isEditingTitle) return;
+
+    if (e.button == 0 && e.target != worldNameInput) {
+        setWorldName(worldNameInput.value);
+        exitTitleEdit();
+        e.stopPropagation();
+    }
+});
 
 let currentlyEditing = false;
 function changeEditMode(shouldBeActive) {
@@ -47,6 +111,12 @@ function changeEditMode(shouldBeActive) {
         pathfindingMode();
     }
 
+    if (shouldBeActive) {
+        setEditMode('rooms');
+    } else {
+        setEditMode(null);
+    }
+
     editButton.classList.toggle("off", shouldBeActive);
     pathfinderButton.classList.toggle("off", shouldBeActive);
     editButtonsSection.classList.toggle("on", shouldBeActive);
@@ -59,17 +129,46 @@ const editModes = {
     rooms: editRoomsButton,
     paths: editPathsButton,
     smart: editSmartButton,
+    eraser: editEraserButton,
 };
-let currentEditMode = 'rooms';
-editModes[currentEditMode].classList.add('selected');
+let currentEditMode = null;
+
+function setEditMode(wantedMode) {
+    if (!wantedMode) {
+        wantedMode = null;
+    }
+
+    if (currentEditMode === wantedMode) return;
+    selectRoomId(null);
+    if (currentEditMode !== null) {
+        editModes[currentEditMode].classList.remove('selected');
+    }
+    currentEditMode = wantedMode;
+    if (currentEditMode !== null) {
+        editModes[currentEditMode].classList.add('selected');
+
+
+        roomInfoDisplay.style.visibility = 'visible';
+        roomIdDisplay.style.display = 'none';
+        roomExitsDisplay.style.display = 'none';
+        if (currentEditMode === 'rooms') {
+            roomHeaderDisplay.textContent = 'Create or erase rooms on click';
+        }
+        if (currentEditMode === 'paths') {
+            roomHeaderDisplay.textContent = 'Connect or disconnect paths on click';
+        }
+        if (currentEditMode === 'smart') {
+            roomHeaderDisplay.textContent = 'Create on click and drag';
+        }
+        if (currentEditMode === 'eraser') {
+            roomHeaderDisplay.textContent = 'Erase on click and drag';
+        }
+    }
+}
 
 for (const key of Object.keys(editModes)) {
     editModes[key].addEventListener('click', function () {
-        if (currentEditMode === key) return;
-        selectRoomId(null);
-        editModes[currentEditMode].classList.remove('selected');
-        currentEditMode = key;
-        editModes[currentEditMode].classList.add('selected');
+        setEditMode(key);
     });
 }
 
@@ -294,7 +393,9 @@ preview.addEventListener('click', function (e) {
     if (roomId === undefined || roomId === null) {
         // console.log("room ID invalid, didn't click on a room");
         if (!isPathfinding) {
-            showInfoAboutRoom(null);
+            if (!currentlyEditing) {
+                showInfoAboutRoom(null);
+            }
             selectRoomId(null);
         }
         return;
@@ -382,18 +483,35 @@ function mouseMove(e) {
         const roomId = e.target.getAttribute('data-room-id');
         if (roomId) {
             const room = currentWorld.getRoomById(roomId);
-            if (!room.canEnter) {
-                room.canEnter = true;
-                didChange = true;
-            }
-            if (lastMouseRoomId !== null) {
-                const lastRoom = currentWorld.getRoomById(lastMouseRoomId);
-                if (!lastRoom.hasExitTo(room) && currentWorld.isWrappingNeighbors(lastRoom, room)) {
-                    lastRoom.connectTo(room);
+            if (currentEditMode === 'smart') {
+                if (!room.canEnter) {
+                    room.canEnter = true;
                     didChange = true;
                 }
+                if (lastMouseRoomId !== null) {
+                    const lastRoom = currentWorld.getRoomById(lastMouseRoomId);
+                    if (!lastRoom.hasExitTo(room) && currentWorld.isWrappingNeighbors(lastRoom, room)) {
+                        lastRoom.connectTo(room);
+                        didChange = true;
+                    }
+                }
+                lastMouseRoomId = roomId;
             }
-            lastMouseRoomId = roomId;
+            if (currentEditMode === 'eraser') {
+                if (room.canEnter) {
+                    room.canEnter = false;
+                    currentWorld.blockRoom(room);
+                    didChange = true;
+                }
+                if (lastMouseRoomId !== null) {
+                    const lastRoom = currentWorld.getRoomById(lastMouseRoomId);
+                    if (lastRoom.hasExitTo(room) && currentWorld.isWrappingNeighbors(lastRoom, room)) {
+                        lastRoom.disconnectFrom(room);
+                        didChange = true;
+                    }
+                }
+                lastMouseRoomId = roomId;
+            }
         }
     }
     if (didChange) {
@@ -414,11 +532,13 @@ preview.addEventListener('mousedown', function (e) {
     e.preventDefault ? e.preventDefault() : e.returnValue = false;
 
     if (!currentlyEditing) return;
-    if (currentEditMode !== 'smart') return;
+    if (currentEditMode !== 'smart' && currentEditMode !== 'eraser') {
+        return;
+    }
 
     stopDrag();
     mouseMove(e);
-    preview.addEventListener('mouseover', mouseMove, {bubble: true});
+    preview.addEventListener('mouseover', mouseMove, { bubble: true });
 });
 document.addEventListener('mouseup', function (e) {
     // console.log('mouse button up', e);
@@ -437,7 +557,6 @@ document.addEventListener('blur', function (e) {
 });
 
 
-// temp change for consistent exits and ID:s - String(currentWorld.numberOfActiveRoomsBeforeRoom(room) + 1)
 function showInfoAboutRoom(room) {
     if (room && room.canEnter) {
         roomInfoDisplay.style.visibility = 'visible';
@@ -462,6 +581,7 @@ function showInfoAboutRoom(room) {
     }
 }
 
+let saveTheWorldTimeoutId = null;
 function saveWorldEdits() {
     let xhr = (window.XMLHttpRequest) ? new XMLHttpRequest() : new activeXObject("Microsoft.XMLHTTP");
     xhr.open('put', 'http://localhost:8000/api/worlds/' + viewedWorldId, true);
@@ -472,12 +592,24 @@ function saveWorldEdits() {
     xhr.onreadystatechange = function () {
         if (this.readyState == 4) {
             if (this.status == 200) {
+                if (saveTheWorldTimeoutId !== null) {
+                    clearTimeout(saveTheWorldTimeoutId);
+                    saveTheWorldTimeoutId = null;
+                }
                 // Typical action to be performed when the document is ready:
-                console.log('OK');
+                roomInfoDisplay.style.visibility = 'visible';
+                const shownText = 'Saved the world'
+                roomHeaderDisplay.textContent = shownText;
+
+                saveTheWorldTimeoutId = setTimeout(function () {
+                    saveTheWorldTimeoutId = null;
+                    if (roomHeaderDisplay.textContent === shownText) {
+                        roomInfoDisplay.style.visibility = 'hidden';
+                    }
+                }, 5000);
             } else {
                 console.error('Backend failed:\n', xhr.responseText);
             }
         }
     };
 }
-

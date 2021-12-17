@@ -512,6 +512,17 @@ input::-webkit-inner-spin-button {
     padding-top: 20px;
     padding-bottom: 10px;
 }
+.world-header.editing-name #world-name {
+    display: none;
+}
+.world-header:not(.editing-name) #world-name-edit {
+    display: none;
+}
+.world-header #world-name-edit {
+    width: 50vw;
+    text-align: center;
+    font-size: 0.5em;
+}
 
 .nav-bar {
     display: flex;
@@ -557,6 +568,10 @@ table {
 
 .edit-buttons.on {
     display: block;
+}
+
+#save-btn, #btn-edit-paths, #btn-toggle-rooms, #btn-edit-smart, #btn-eraser, #back-btn-edit {
+    font-size: 1.5vw;
 }
 
 .room-info {
