@@ -7,9 +7,9 @@ class Room {
     }
 
     Baptist() {
-        const adj = ["bloody", "bleak", "dark", "clean", "dirty", "cozy", "heavenly", "hellish", "beautiful", "never-ending", "holy", "lovely", "empty","distugsting"];
-        const plc = ["hallway", "room", "corridor", "toilet", "kitchen", "basement", "bedroom", "dining room", "garden", "chapel", "dining hall", "bathroom","dungeon"];
-        const dsc = ["death", "despair", "hopelessness", "healing", "horror", "happiness", "joy", "bliss", "business", "love", "sin", "virtue", "hope", "corruption","helplesness"];
+        const adj = ["bloody", "bleak", "dark", "clean", "dirty", "cozy", "heavenly", "hellish", "beautiful", "never-ending", "holy", "lovely", "empty","disgusting","questionable"];
+        const plc = ["hallway", "room", "corridor", "toilet", "kitchen", "basement", "bedroom", "dining room", "garden", "chapel", "dining hall", "bathroom","dungeon","cinema","trench","street","skyscraper","building","home","bar","park","alley","junkyard","castle","beach","airport","bank"];
+        const dsc = ["death", "despair", "hopelessness", "healing", "horror", "happiness", "joy", "bliss", "business", "love", "sin", "virtue", "hope", "corruption","helplessness"];
         let word1 = adj[Math.floor(Math.random() * adj.length)];
         let word2 = plc[Math.floor(Math.random() * plc.length)];
         let word3 = dsc[Math.floor(Math.random() * dsc.length)];
@@ -422,9 +422,9 @@ class World {
 }
 
 function WorldBaptist() {
-    const adj = ["bloody", "bleak", "dark", "heavenly", "hellish", "beautiful", "holy", "lovely", "empty","happy"];
-    const plc = ["plane", "world", "place","building","home"];
-    const dsc = ["death", "despair", "hopelessness", "horror", "happiness", "joy", "bliss", "business", "love", "sin", "corruption", "struggle","nostalgia"];
+    const adj = ["bloody", "bleak", "dark", "heavenly", "hellish", "beautiful", "holy", "lovely", "empty","happy","apocalyptic","dystopic","utopic","wacky","stupid","idiotic"];
+    const plc = ["plane", "world", "place","kingdom","village","city","refuge","camp"];
+    const dsc = ["death", "despair", "hopelessness", "horror", "happiness", "joy", "bliss", "business", "love", "sin", "corruption", "struggle","nostalgia","isolation"];
     let word1 = adj[Math.floor(Math.random() * adj.length)];
     let word2 = plc[Math.floor(Math.random() * plc.length)];
     let word3 = dsc[Math.floor(Math.random() * dsc.length)];
@@ -469,7 +469,6 @@ function SPF(world, startID, endID) {
         console.error("Invalid parameter/s");
     }
 }
-
 
 function DijkstraAlternative(world, startID, endID) {
     // Inspired by pseudo-code from wikipedia:
