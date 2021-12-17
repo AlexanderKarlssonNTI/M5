@@ -2,13 +2,19 @@ function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+let allWorlds = null;
 loadingAllWorlds
     .then(function (data) {
         console.log(data);
+        allWorlds = data.worlds;
         for (const world of data.worlds) {
             const createEntry = function (text) {
                 const label = document.createElement('label');
-                label.textContent = text || 'No name';
+
+                const span = document.createElement('span');
+                span.textContent = text || 'No name';
+                label.appendChild(span);
+
                 label.setAttribute('data-world-id', world.id);
 
                 const input = document.createElement('input');
@@ -23,7 +29,7 @@ loadingAllWorlds
             }
             document.getElementById('world-name').appendChild(createEntry(world.name));
             document.getElementById('world-type').appendChild(createEntry(capitalizeFirstLetter(world.type)));
-            document.getElementById('world-room-amount').appendChild(createEntry(world.roomTotalAmount));
+            document.getElementById('world-room-amount').appendChild(createEntry(world.roomActiveAmount));
         }
     })
     .catch(function (error) {
@@ -76,8 +82,41 @@ function deleteSelectedWorld(selectedWorld) {
 };
 
 function reshuffleName() {
-    for (const world of data.worlds == selectedWorld) {
-    document.getElementById('world-name').appendChild(world.name);
-    document.getElementById('world-name').textContent = WorldBaptist();
+    for (const world of allWorlds) {
+        if (world.id != selectedWorld) {
+            continue;
+        }
+
+
+        const previousRandomWorldName = world.name;
+        let newName = previousRandomWorldName;
+        while (previousRandomWorldName === newName) {
+            newName = WorldBaptist();
+        }
+        world.name = newName;
+
+        for (const label of document.querySelectorAll(`#world-name [data-world-id="${world.id}"] span`)) {
+            label.textContent = newName;
+        }
+
+
+        let xhr = (window.XMLHttpRequest) ? new XMLHttpRequest() : new activeXObject("Microsoft.XMLHTTP");
+        xhr.open('put', 'http://localhost:8000/api/worlds/' + selectedWorld, true);
+        xhr.send(JSON.stringify({
+            world: {
+                name: newName,
+            },
+        }));
+
+        xhr.onreadystatechange = function () {
+            if (this.readyState == 4) {
+                if (this.status == 200) {
+                    // Typical action to be performed when the document is ready:
+                    console.log('OK');
+                } else {
+                    console.error('Backend failed:\n', xhr.responseText);
+                }
+            }
+        };
     }
 }
