@@ -41,15 +41,14 @@ function onWorldTypeChanged() {
 onWorldTypeChanged();
 
 function randomizeWorldName() {
-    // hiddenNameComparisonInput.value = WorldBaptist();
-    nameConfig.value = WorldBaptist();
-    // while (nameConfig.value == hiddenNameComparisonInput.value) {
-    //     console.log('a');
-    //     hiddenNameComparisonInput.value = WorldBaptist();
-    //     if (nameConfig.value != hiddenNameComparisonInput.value) {
-    //         nameConfig.value = hiddenNameComparisonInput.value;
-    //     }
-    // }
+    const previousRandomWorldName = nameConfig.value;
+    let newName = previousRandomWorldName;
+    while (previousRandomWorldName === newName) {
+        newName = WorldBaptist();
+    }
+    nameConfig.value = newName;
+    // Not sure if oninput is triggered when we manually change inputs
+    inputChanged();
 }
 
 let currentWorld = null;
@@ -62,8 +61,7 @@ const generateWorld = function (showAsWell = true) {
     if (nameConfig.value) {
         worldName = nameConfig.value;
     } else {
-        let world = new World();
-        worldName = world.name;
+        worldName = WorldBaptist();
     }
 
     let errorMessage = null;
