@@ -333,6 +333,12 @@ class World {
         room.disconnectFrom(this.wrappingRoomRightOf(room));
         room.canEnter = false;
     }
+    isWrappingNeighbors(roomA, roomB) {
+        return this.wrappingRoomLeftOf(roomA) === roomB ||
+            this.wrappingRoomRightOf(roomA) === roomB ||
+            this.wrappingRoomAboveOf(roomA) === roomB ||
+            this.wrappingRoomBelowOf(roomA) === roomB;
+    }
 
     getRoomById(roomId) {
         switch (typeof roomId) {
@@ -412,15 +418,15 @@ class World {
 
 function WorldBaptist() {
     const adj = ["bloody", "bleak", "dark", "clean", "dirty", "cozy", "heavenly", "hellish", "beautiful", "holy", "lovely", "empty"];
-    const plc = ["plane","world","place"];
-    const dsc = ["death", "despair", "hopelessness", "horror", "happiness", "joy", "bliss", "business", "love", "sin", "virtue", "hope", "corruption","struggle"];
+    const plc = ["plane", "world", "place"];
+    const dsc = ["death", "despair", "hopelessness", "horror", "happiness", "joy", "bliss", "business", "love", "sin", "virtue", "hope", "corruption", "struggle"];
     let word1 = adj[Math.floor(Math.random() * adj.length)];
     let word2 = plc[Math.floor(Math.random() * plc.length)];
     let word3 = dsc[Math.floor(Math.random() * dsc.length)];
     if (Math.ceil(Math.random() * 2) === 1) {
         let fullName = "The " + word2 + " of " + word3;
         return fullName;
-    } else if (Math.ceil(Math.random() * 2) === 2){
+    } else /* if (Math.ceil(Math.random() * 2) === 2) */ {
         let fullName = "The " + word1 + " " + word2 + " of " + word3;
         return fullName;
     }
@@ -460,28 +466,99 @@ function SPF(world, startID, endID) {
 }
 
 
+function DijkstraAlternative(world, startID, endID) {
+    // Inspired by pseudo-code from wikipedia:
+    // https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm#Pseudocode
+
+    if (startID <= 0 && endID <= 0 && startID > world.rooms.length && endID > world.rooms.length) {
+        console.error("Invalid parameter/s");
+        return null;
+    }
+
+    // Full distance when following shortest path to a room (distance[roomId - 1] === shortestDistanceToRoom):
+    const distance = new Array(world.rooms.length).fill(null);
+    // The room you come from when following the shortest path to a room (previous[roomId - 1] === neighborIdThatLeadsTowardsStart):
+    const previous = new Array(world.rooms.length).fill(null);
+
+    distance[startID - 1] = 0;
+    // Anything in queue must have a distance (and preferably the ones closer to the start should have smaller distances)
+    let queue = [startID];
+
+    while (queue.length > 0) {
+        // We ensure that the first element in queue has the lowest distance (of all unvisited rooms)
+        const currentId = queue.shift();
+        const currentRoom = world.rooms[currentId - 1];
+        const currentDistance = distance[currentId - 1];
+
+        for (const neighborId of currentRoom.exits) {
+            // Could use some other distance between neighbors (instead of 1):
+            const fullPathToNeighborDistance = currentDistance + 1;
+            const shortestDistanceToNeighborSoFar = distance[neighborId - 1];
+
+            if (shortestDistanceToNeighborSoFar === null || fullPathToNeighborDistance < shortestDistanceToNeighborSoFar) {
+                // Ignore blocked rooms:
+                // if (!world.rooms[neighborId - 1].canEnter) continue;
+
+                distance[neighborId - 1] = fullPathToNeighborDistance;
+                previous[neighborId - 1] = currentId;
+
+                // Keep track of what rooms have distances (also since neighbors are always 1 unit
+                // apart and we visit neighbors of the earlier rooms first we know that every previous
+                // room in the queue has a shorter distance then this newly added room):
+                queue.push(neighborId);
+
+                if (neighborId === endID) {
+                    // Found a path to the exit (also since we always visit rooms using the shortest path
+                    // first we won't find a shorter path than this):
+                    queue = [];
+                    break;
+                }
+            }
+        }
+    }
+
+
+    // Use our "path map" to find the shortest path to the exit:
+
+    if (distance[endID - 1] === null) {
+        // No path to exit:
+        return null;
+    }
+
+    let pathToExit = [];
+    let currentRoomId = endID;
+    while (currentRoomId !== startID) {
+        pathToExit.unshift(currentRoomId);
+        // Get the room that you come from when following the shortest path to the current room:
+        currentRoomId = previous[currentRoomId - 1];
+    }
+    pathToExit.unshift(startID);
+
+    return pathToExit;
+}
 function Dijkstra(world, startID, endID) {
-    if (startID > 0 && endID > 0 && startID < world.rooms.length && endID < world.rooms.length) {
+    if (startID > 0 && endID > 0 && startID <= world.rooms.length && endID <= world.rooms.length) {
         let visited = [startID];
         let pathways = [];
         let paths = [];
+        // Everything in target must also be in arr
         let checker = (arr, target) => target.every(Y => arr.includes(Y));
-        for (let n = 0; n < world.rooms[0].exits.length;n++) {
-            pathways.push([world.rooms[0].ID,world.rooms[0].exits[n]]);
+        for (let n = 0; n < world.rooms[0].exits.length; n++) {
+            pathways.push([world.rooms[0].ID, world.rooms[0].exits[n]]);
         }
-        for (let x = 1; x < world.rooms.length;x++) {
+        for (let x = 1; x < world.rooms.length; x++) {
             // console.log("pathway");
             // console.log(pathways);
             let tempExits = world.rooms[x].exits;
-            for (let y = 0; y < tempExits.length;y++) {
+            for (let y = 0; y < tempExits.length; y++) {
                 let temp = [];
                 temp.push(world.rooms[x].ID);
                 temp.push(parseInt(tempExits[y]));
                 // console.log("temp");
                 // console.log(temp);
                 let matching = false;
-                for (let z = 0; z < pathways.length;z++) {
-                    let tempy = checker(pathways[z],temp);
+                for (let z = 0; z < pathways.length; z++) {
+                    let tempy = checker(pathways[z], temp);
                     if (tempy != false) {
                         matching = true;
                     }
@@ -491,14 +568,14 @@ function Dijkstra(world, startID, endID) {
                 }
             }
         }
-        for (path in pathways) {
+        for (let path in pathways) {
             let temp;
-            if (checker(pathways[path],[startID]) === true) {
+            if (checker(pathways[path], [startID]) === true) {
                 temp = pathways[path];
                 console.log(temp.indexOf(startID));
-                visited.push(temp[temp.indexOf(startID)-1]);
-                paths.push([startID,temp[temp.indexOf(startID)-1]]);
-                pathways.slice(pathways.indexOf(pathways[path]),1);
+                visited.push(temp[temp.indexOf(startID) - 1]);
+                paths.push([startID, temp[temp.indexOf(startID) - 1]]);
+                pathways.slice(pathways.indexOf(pathways[path]), 1);
             }
         }
         console.log("Start");
@@ -514,20 +591,20 @@ function Dijkstra(world, startID, endID) {
                     let temp;
                     let snippet = paths[currentPath].slice(-2);
                     console.log(snippet);
-                    if (checker(snippet,pathways[path]) === false) {
+                    if (checker(snippet, pathways[path]) === false) {
                         console.log(temp);
-                        temp = snippet.slice(snippet.indexOf(paths[-1]),1);
+                        temp = snippet.slice(snippet.indexOf(paths[-1]), 1);
                         if (temp[0] == endID) {
                             paths[currentPath].push(temp[0]);
                             console.log(paths[currentPath]);
                             exitFound = false;
                             return paths[currentPath];
-                        } else if (checker(visited,temp) === false) {
+                        } else if (checker(visited, temp) === false) {
                             paths[currentPath].push(temp[0]);
                             console.log(paths[currentPath]);
                             visited.push(temp[0]);
                             console.log(visited);
-                            pathways.slice(indexOf(pathways[path]),1);
+                            pathways.slice(indexOf(pathways[path]), 1);
                         }
                     }
                 }
