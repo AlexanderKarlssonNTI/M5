@@ -18,6 +18,7 @@ class CreateWorldsTable extends Migration
             $table->string('title');
             $table->string('type');
             $table->unsignedInteger('side_length');
+            $table->unsignedInteger('room_active_amount');
             $table->unsignedInteger('room_total_amount');
             $table->unsignedInteger('room_row_amount');
             $table->unsignedInteger('room_branch_factor')->nullable();
