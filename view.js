@@ -265,6 +265,7 @@ function pathfindingMode(inputRoom = null) {
                 }
             }
         } else {
+            roomHeaderDisplay.textContent = "Calculating..."
             shortestPath = DijkstraAlternative(currentWorld, pathfinderStart, pathfinderEnd);
         }
         let shortestPathText = "doesn't exist";

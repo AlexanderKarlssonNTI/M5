@@ -7,14 +7,19 @@ class Room {
     }
 
     Baptist() {
-        const adj = ["bloody", "bleak", "dark", "clean", "dirty", "cozy", "heavenly", "hellish", "beautiful", "never-ending", "holy", "lovely", "empty"];
-        const plc = ["hallway", "room", "corridor", "toilet", "kitchen", "basement", "bedroom", "dining room", "garden", "chapel", "dining hall", "bathroom"];
-        const dsc = ["death", "despair", "hopelessness", "healing", "horror", "happiness", "joy", "bliss", "business", "love", "sin", "virtue", "hope", "corruption"];
+        const adj = ["bloody", "bleak", "dark", "clean", "dirty", "cozy", "heavenly", "hellish", "beautiful", "never-ending", "holy", "lovely", "empty","distugsting"];
+        const plc = ["hallway", "room", "corridor", "toilet", "kitchen", "basement", "bedroom", "dining room", "garden", "chapel", "dining hall", "bathroom","dungeon"];
+        const dsc = ["death", "despair", "hopelessness", "healing", "horror", "happiness", "joy", "bliss", "business", "love", "sin", "virtue", "hope", "corruption","helplesness"];
         let word1 = adj[Math.floor(Math.random() * adj.length)];
         let word2 = plc[Math.floor(Math.random() * plc.length)];
         let word3 = dsc[Math.floor(Math.random() * dsc.length)];
-        let fullName = "A " + word1 + " " + word2 + " of " + word3;
-        return fullName;
+        if ((Math.random() * 3) >= 2) {
+            let fullName = "The " + word2 + " of " + word3;
+            return fullName;
+        } else {
+            let fullName = "The " + word1 + " " + word2 + " of " + word3;
+            return fullName;
+        }
     }
 
     hasExitTo(room) {
@@ -417,13 +422,13 @@ class World {
 }
 
 function WorldBaptist() {
-    const adj = ["bloody", "bleak", "dark", "clean", "dirty", "cozy", "heavenly", "hellish", "beautiful", "holy", "lovely", "empty"];
-    const plc = ["plane", "world", "place"];
-    const dsc = ["death", "despair", "hopelessness", "horror", "happiness", "joy", "bliss", "business", "love", "sin", "virtue", "hope", "corruption", "struggle"];
+    const adj = ["bloody", "bleak", "dark", "heavenly", "hellish", "beautiful", "holy", "lovely", "empty","happy"];
+    const plc = ["plane", "world", "place","building","home"];
+    const dsc = ["death", "despair", "hopelessness", "horror", "happiness", "joy", "bliss", "business", "love", "sin", "corruption", "struggle","nostalgia"];
     let word1 = adj[Math.floor(Math.random() * adj.length)];
     let word2 = plc[Math.floor(Math.random() * plc.length)];
     let word3 = dsc[Math.floor(Math.random() * dsc.length)];
-    if (Math.ceil(Math.random() * 2) === 1) {
+    if ((Math.random() * 3) >= 2) {
         let fullName = "The " + word2 + " of " + word3;
         return fullName;
     } else /* if (Math.ceil(Math.random() * 2) === 2) */ {
