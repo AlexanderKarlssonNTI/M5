@@ -61,6 +61,12 @@ function worldSelected(world) {
     console.log(selectedWorld);
 }
 
+function loadWorld() {
+    if (selectedWorld >= 1) {
+        window.location.href='view.html?id=' + selectedWorld;
+    }
+}
+
 function deleteSelectedWorld(selectedWorld) {
     fetch('http://localhost:8000/api/worlds/' + selectedWorld + "/delete", {
         method: 'DELETE',
