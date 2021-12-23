@@ -1,19 +1,28 @@
+const offlineMode = localStorage.getItem('pathOS_offlineModeEnabled') === 'true';
+
 const urlParams = new URLSearchParams(window.location.search);
 const viewedWorldId = parseInt(urlParams.get('id'));
 
 let currentWorld = null;
 let updateCurrentUi = function () { };
 if (!isNaN(viewedWorldId)) {
-    fetch('http://localhost:8000/api/worlds/' + viewedWorldId)
-        .then(function (response) { return response.json(); })
-        .then(function (data) {
-            currentWorld = new World(data.name, 'load', data);
-            document.getElementById('world-name').textContent = data.name;
-            updateCurrentUi = showWorld(currentWorld);
-        })
-        .catch(function (error) {
-            console.error('Failed to get info from backend:\n', error);
-        });
+    if (offlineMode) {
+        const data = JSON.parse(localStorage.getItem('pathOS_world-' + viewedWorldId));
+        currentWorld = new World(data.name, 'load', data);
+        document.getElementById('world-name').textContent = data.name;
+        updateCurrentUi = showWorld(currentWorld);
+    } else {
+        fetch('http://localhost:8000/api/worlds/' + viewedWorldId)
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
+                currentWorld = new World(data.name, 'load', data);
+                document.getElementById('world-name').textContent = data.name;
+                updateCurrentUi = showWorld(currentWorld);
+            })
+            .catch(function (error) {
+                console.error('Failed to get info from backend:\n', error);
+            });
+    }
 }
 
 
@@ -23,6 +32,15 @@ const worldNameInput = document.getElementById('world-name-edit');
 const editButton = document.getElementById("edit-btn");
 const pathfinderButton = document.getElementById("pathfinder-btn");
 const pathfinderCancel = document.getElementById("pathfinding-cancel");
+
+const pathfinderVisualize = document.getElementById("visualize-pathfinder-method");
+const pathfinderVisualizeDijkstraToEnd = document.getElementById("visualize-dijkstra-to-end");
+const pathfinderVisualizeSpfAllPaths = document.getElementById("visualize-spf-all-paths");
+
+const dijkstraAlgorithmButton = document.getElementById('pathfinder-method-dijkstra');
+const aStarAlgorithmButton = document.getElementById('pathfinder-method-a-star');
+const spfAlgorithmButton = document.getElementById('pathfinder-method-spf');
+const spfFastAlgorithmButton = document.getElementById('pathfinder-method-spf-fast');
 
 const editButtonsSection = document.getElementById("edit-btns");
 
@@ -65,7 +83,7 @@ worldNameLabel.addEventListener('click', function (e) {
         e.stopPropagation();
     }
 })
-worldNameInput.addEventListener('keydown', function(event) {
+worldNameInput.addEventListener('keydown', function (event) {
     if (!isEditingTitle) return;
 
     // Inspired by code at:
@@ -173,7 +191,190 @@ for (const key of Object.keys(editModes)) {
 }
 
 
+const pathfindingAlgorithmConfigs = {
+    dijkstra: dijkstraAlgorithmButton,
+    aStar: aStarAlgorithmButton,
+    spf: spfAlgorithmButton,
+    spfFast: spfFastAlgorithmButton,
+};
+let currentPathfindingAlgorithm = null;
 
+function setPathfindingAlgorithm(wantedAlgorithm) {
+    if (!wantedAlgorithm) {
+        wantedAlgorithm = null;
+    }
+    if (currentPathfindingAlgorithm === wantedAlgorithm) return;
+
+    if (currentPathfindingAlgorithm !== null) {
+        pathfindingAlgorithmConfigs[currentPathfindingAlgorithm].classList.remove('selected');
+    }
+    currentPathfindingAlgorithm = wantedAlgorithm;
+    if (currentPathfindingAlgorithm !== null) {
+        pathfindingAlgorithmConfigs[currentPathfindingAlgorithm].classList.add('selected');
+    }
+}
+setPathfindingAlgorithm('dijkstra');
+
+for (const key of Object.keys(pathfindingAlgorithmConfigs)) {
+    pathfindingAlgorithmConfigs[key].addEventListener('click', function () {
+        setPathfindingAlgorithm(key);
+    });
+}
+
+
+
+
+let pathfindingBackgroundWorkCancel = null;
+function clearPathHighlight() {
+    if (pathfindingBackgroundWorkCancel !== null) {
+        pathfindingBackgroundWorkCancel();
+        pathfindingBackgroundWorkCancel = null;
+    }
+
+    const clearAllClasses = function (className) {
+        for (const element of Array.from(document.getElementsByClassName(className))) {
+            element.classList.remove(className);
+        }
+    };
+    clearAllClasses('found-path-room-highlighting');
+    clearAllClasses('found-path-spacer-highlighting');
+}
+function pathHighlight(options) {
+    if (!options) return;
+
+    // To be safe, make sure to cancel anything else that is in progress:
+    if (pathfindingBackgroundWorkCancel !== null) {
+        pathfindingBackgroundWorkCancel();
+        pathfindingBackgroundWorkCancel = null;
+    }
+
+    // Some default values when handling a simple path described by following room ids:
+    if (options.simplePath) {
+        options.roomsCount = options.simplePath.length;
+        if (!('pathsPerRoom' in options)) {
+            options.pathsPerRoom = 2;
+        }
+        options.getRoom = function (i) {
+            return options.simplePath[i];
+        };
+        options.getPathStart = function (i, pathIndex) {
+            if (pathIndex === 0) {
+                // First path starts in previous room (indicates a path towards current room):
+                return options.simplePath[i - 1];
+            } else {
+                // 2nd path starts in current room (indicates a path from current room towards the previous):
+                return options.simplePath[i];
+            }
+        };
+        options.getPathEnd = function (i, pathIndex) {
+            if (pathIndex === 0) {
+                // The first path indicates a path towards the current room:
+                return options.simplePath[i];
+            } else {
+                // The second path indicates a path back towards the previous room:
+                return options.simplePath[i - 1];
+            }
+        };
+    }
+
+    if (options.animationTime > 0 && options.roomsCount > 1) {
+        // One step per room + {pathPerRooms} steps between rooms (no paths to do after the last room) - the first room is highlighted immediately
+        let totalSteps = options.roomsCount + (options.roomsCount - 1) * options.pathsPerRoom - 1;
+
+        let minFrameTime = 1000 / 30;
+        let frameTime = options.animationTime / totalSteps;
+        if (frameTime < minFrameTime) {
+            frameTime = minFrameTime;
+        }
+
+        let totalFrames = Math.ceil(options.animationTime / frameTime);
+        let stepsPerFrame = Math.ceil(totalSteps / totalFrames);
+        let currentStep = 0;
+
+        const stepsPerRoom = options.pathsPerRoom + 1;
+        const startTime = Date.now();
+        const doStep = function () {
+            let stepsToDo = stepsPerFrame;
+            if (options.compensateForLag) {
+                const currentTime = Date.now();
+                const currentFrame = Math.floor(currentStep / stepsPerFrame);
+
+                const actualElapsedTime = currentTime - startTime;
+                const wantedElapsedTime = (currentFrame - 1) * frameTime;
+                const missedFrames = Math.floor((actualElapsedTime - wantedElapsedTime) / frameTime);
+
+                if (missedFrames > 0) {
+                    stepsToDo += missedFrames * stepsPerFrame;
+                    console.warn('missed some frames for animation: ', missedFrames);
+                }
+            }
+            for (let step = 0; step < stepsToDo; step++) {
+                // The room index (for paths this is the room the path is towards, this ensures that we don't activate paths after the last room)
+                let i = Math.floor((currentStep + options.pathsPerRoom) / stepsPerRoom);
+
+                if (currentStep > totalSteps || i >= options.roomsCount) {
+                    // (Done all steps + initial step) or (shown all rooms)
+                    clearInterval(pathfindingIntervalId);
+                    pathfindingBackgroundWorkCancel = null;
+
+                    if (options.done) {
+                        options.done();
+                    }
+                    return;
+                }
+                // First step is to highlight the room, any other step is to highlight a path:
+                const pathIndexOrRoom = currentStep % stepsPerRoom;
+
+                if (pathIndexOrRoom === 0) {
+                    // Activate room:
+                    for (const roomPath of document.querySelectorAll(`.room[data-room-id="${options.getRoom(i)}"]`)) {
+                        roomPath.classList.add('found-path-room-highlighting');
+                    }
+                } else {
+                    // Activate path towards room:
+                    for (const spacerPath of document.querySelectorAll(`.has-path[data-path-from-room-id="${options.getPathStart(i, pathIndexOrRoom - 1)}"][data-path-to-room-id="${options.getPathEnd(i, pathIndexOrRoom - 1)}"]`)) {
+                        spacerPath.classList.add('found-path-spacer-highlighting');
+                    }
+                }
+                currentStep++;
+            }
+        };
+        const pathfindingIntervalId = setInterval(doStep, frameTime);
+        pathfindingBackgroundWorkCancel = function () {
+            clearInterval(pathfindingIntervalId);
+            if (options.canceled) {
+                options.canceled();
+            }
+        };
+        // Do first step immediately:
+        doStep();
+    } else {
+        for (let i = 0; i < options.roomsCount; i++) {
+            for (const roomPath of document.querySelectorAll(`.room[data-room-id="${options.getRoom(i)}"]`)) {
+                roomPath.classList.add('found-path-room-highlighting');
+            }
+            if (i !== 0) {
+                for (let pathIndex = 0; pathIndex < options.pathsPerRoom; pathIndex++) {
+                    for (const spacerPath of document.querySelectorAll(`.has-path[data-path-from-room-id="${options.getPathStart(i, pathIndex)}"][data-path-to-room-id="${options.getPathEnd(i, pathIndex)}"]`)) {
+                        spacerPath.classList.add('found-path-spacer-highlighting');
+                    }
+                }
+            }
+        }
+        if (options.done) {
+            const timeoutId = setTimeout(function() {
+                pathfindingBackgroundWorkCancel = null;
+                options.done();
+            }, 0);
+            pathfindingBackgroundWorkCancel = function () {
+                clearTimeout(timeoutId);
+                if (options.canceled) {
+                    options.canceled();
+                }
+            };
+        }
+    }
+}
 
 let isPathfinding = false;
 pathfinderButton.addEventListener('click', function () {
@@ -192,7 +393,6 @@ pathfinderCancel.addEventListener("click", function () {
 let currentPathfindingPhase = 1;
 let pathfinderStart;
 let pathfinderEnd;
-let pathfindingIntervalId = null;
 let pathfindingAnimationTime = 1000;
 // let PathfinderSelectS = document.getElementById("Pathfinder-selectS");
 // let PathfinderSelectE = document.getElementById("Pathfinder-selectE");
@@ -200,24 +400,14 @@ let pathfindingAnimationTime = 1000;
 function pathfindingMode(inputRoom = null) {
 
     // Clear old paths:
-    if (pathfindingIntervalId !== null) {
-        clearInterval(pathfindingIntervalId);
-        pathfindingIntervalId = null;
-    }
-    const clearAllClasses = function (className) {
-        for (const element of Array.from(document.getElementsByClassName(className))) {
-            element.classList.remove(className);
-        }
-    };
-    clearAllClasses('found-path-room-highlighting');
-    clearAllClasses('found-path-spacer-highlighting');
-
+    clearPathHighlight();
 
     // Make sure UI is in the correct state:
     showInfoAboutRoom(null);
 
     pathfinderCancel.classList.toggle("on", isPathfinding);
     pathfinderButton.classList.toggle("off", isPathfinding);
+    roomInfoDisplay.classList.toggle('enable-pathfinder-options', isPathfinding);
     if (isPathfinding) {
         roomInfoDisplay.style.visibility = 'visible';
     } else {
@@ -251,101 +441,264 @@ function pathfindingMode(inputRoom = null) {
         // roomPath.classlist.remove;
         // spacerPath.classList.remove;
         pathfinderEnd = inputRoom;
+        roomHeaderDisplay.textContent = "Calculating...";
+
         let shortestPath = null;
-        if (currentWorld.type != "rectangle" && false) {
-            let paths = SPF(currentWorld, pathfinderStart, pathfinderEnd);
-            if (!paths) {
-                // there was an error
-                paths = [];
+        let startTime = Date.now();
+
+        const highlightToExit = function () {
+            if (!shortestPath) return;
+
+            pathHighlight({
+                animationTime: pathfindingAnimationTime,
+                compensateForLag: false,
+                pathsPerRoom: 2,
+
+                simplePath: shortestPath,
+            });
+        };
+        const showShortestPathInfo = function () {
+            let shortestPathText = "doesn't exist";
+            if (shortestPath) {
+                shortestPathText = String(shortestPath.map(function (id) {
+                    return currentWorld.activeRoomNumberForRoom(id) + 1;
+                }));
             }
-            shortestPath = paths[0];
-            for (let x = 1; x < paths.length; x++) {
-                if (paths[x].length < shortestPath.length) {
-                    shortestPath = paths[x];
-                }
-            }
-        } else {
-            roomHeaderDisplay.textContent = "Calculating..."
-            shortestPath = DijkstraAlternative(currentWorld, pathfinderStart, pathfinderEnd);
-        }
-        let shortestPathText = "doesn't exist";
-        if (shortestPath) {
-            shortestPathText = String(shortestPath.map(function (id) {
-                return currentWorld.activeRoomNumberForRoom(id) + 1;
-            }));
-        }
-        roomHeaderDisplay.textContent = "Shortest path between " +
-            String(currentWorld.activeRoomNumberForRoom(pathfinderStart) + 1) + " and " +
-            String(currentWorld.activeRoomNumberForRoom(pathfinderEnd) + 1) + ": \n" +
-            shortestPathText + "\n Select another end or the start to continue";
+            roomHeaderDisplay.textContent = "Shortest path between " +
+                String(currentWorld.activeRoomNumberForRoom(pathfinderStart) + 1) + " and " +
+                String(currentWorld.activeRoomNumberForRoom(pathfinderEnd) + 1) + ": \n" +
+                shortestPathText + "\n Select another end or the start to continue";
+        };
 
-        // Add new classes:
-        if (!shortestPath) {
-            shortestPath = [];
-        }
 
-        if (pathfindingAnimationTime > 0 && shortestPath.length > 1) {
-            // One step per room + 2 steps for paths between rooms - only one step for paths at end and start
-            let totalSteps = shortestPath.length * 3 - 2;
+        if (currentPathfindingAlgorithm === 'spf' || currentPathfindingAlgorithm === 'spfFast') {
+            // Looking at partial paths is slow, so only do it when we are visualizing:
+            const yieldPartialPaths = pathfinderVisualizeSpfAllPaths.checked && pathfinderVisualize.checked;
 
-            let minFrameTime = 1000 / 60;
-            let frameTime = pathfindingAnimationTime / totalSteps;
-            if (frameTime < minFrameTime) {
-                frameTime = minFrameTime;
-            }
+            const spfGenerator = SPF(currentWorld, pathfinderStart, pathfinderEnd, {
+                // Can probably go through at least this many rooms before checking the current time again (which might be expensive):
+                roomsToScanBeforeCheckingTime: 300,
+                // Don't freeze UI for longer than this many milliseconds:
+                maxProcessTime: 300,
+                // Don't consider longer paths that go through rooms we already found shorter paths to:
+                trackShortestPaths: currentPathfindingAlgorithm === 'spfFast',
+                // If this is true then we will also visualize the paths that the algorithm rejects because they don't reach the exit
+                // Also useful to visualize progress when it takes too long to find even one path to the exit:
+                yieldPartialPaths,
+            });
+            const cancel = function () {
+                console.log('SPF pathfinding was canceled after ' + (Date.now() - startTime) + ' ms');
+            };
+            const getNextPath = function () {
+                const shouldVisualize = pathfinderVisualize.checked;
 
-            let totalFrames = Math.ceil(pathfindingAnimationTime / frameTime);
-            let stepsPerFrame = Math.ceil(totalSteps / totalFrames);
-            let currentStep = 0;
-            const doStep = function () {
-                for (let i = 0; i < stepsPerFrame; i++) {
-                    let i = Math.floor((currentStep + 2) / 3);
-                    if (currentStep >= totalSteps || i >= shortestPath.length) {
-                        clearInterval(pathfindingIntervalId);
-                        pathfindingIntervalId = null;
+                // Increase the limit for `i` to do more work before giving
+                // the browser a chance to do something.
+                // Higher `i` => better pathfinding performance
+                // but also more UI lag/freezes
+                for (let i = 0; i < 10; i++) {
+                    const next = spfGenerator.next();
+                    if (next.done) {
+                        // Pathfinding done! SPF has searched all paths!
+                        // Complete the promise so that the pathfinding result
+                        // can be displayed.
+                        console.log('SPF pathfinding completed after ', Date.now() - startTime, ' ms');
+                        showShortestPathInfo();
+                        highlightToExit();
                         return;
                     }
-                    switch (currentStep % 3) {
-                        case 0:
-                            // Activate room:
-                            for (const roomPath of document.querySelectorAll(`.room[data-room-id="${shortestPath[i]}"]`)) {
-                                roomPath.classList.add('found-path-room-highlighting');
-                            }
+                    if (next.value === 'longTime') {
+                        // Took too long to find even one path to the exit, wait a bit and then continue:
+                        break;
+                    }
+                    if (
+                        // No partial paths OR check that it is a full path to the exit:
+                        (!yieldPartialPaths || (next.value[next.value.length - 1] === pathfinderEnd)) &&
+                        // No shortest path OR the new path is shorter then what we have seen before:
+                        (shortestPath === null || shortestPath.length > next.value.length)
+                    ) {
+                        shortestPath = next.value;
+                    }
+                    if (shouldVisualize) {
+                        pathHighlight({
+                            animationTime: yieldPartialPaths ? 0 : 40,
+                            compensateForLag: false,
+                            pathsPerRoom: 2,
+
+                            simplePath: next.value,
+
+                            done: function () {
+                                clearPathHighlight();
+                                getNextPath();
+                            },
+                            canceled: function () {
+                                // Our animation was canceled:
+                                cancel();
+                            },
+                        });
+                        // We will get the next path after we finish with the animation...
+                        return;
+                    }
+                }
+                // We calculated a couple of paths so now we tell the browser
+                // to call us later and let it do some other things (such
+                // as canceling our pathfinder method or any other UI work).
+                const timeoutId = setTimeout(function () {
+                    pathfindingBackgroundWorkCancel = null;
+                    getNextPath();
+                }, 0);
+                pathfindingBackgroundWorkCancel = function () {
+                    clearTimeout(timeoutId);
+                    cancel();
+                };
+            };
+            getNextPath();
+        } else {
+            const toRow = Math.floor((pathfinderEnd - 1) / currentWorld.sideLength);
+            const toColumn = (pathfinderEnd - 1) % currentWorld.sideLength;
+            const totalRows = Math.ceil(currentWorld.rooms.length / currentWorld.sideLength);
+
+            const shouldUseAStar = currentPathfindingAlgorithm === 'aStar';
+
+            // Minimum distance calculations for A* must assume less if any of these things are active:
+            let hasDiagonalPaths = false;
+            let hasHorizontalWrapping = false;
+            let hasVerticalWrapping = false;
+            if (shouldUseAStar) {
+                for (let y = 0; y < totalRows; y++) {
+                    for (let x = 0; x < currentWorld.sideLength; x++) {
+                        const aRoom = currentWorld.getRoomById(y * currentWorld.sideLength + x + 1);
+                        const roomBelow = currentWorld.wrappingRoomBelowOf(aRoom);
+                        if (
+                            aRoom.hasExitTo(currentWorld.wrappingRoomLeftOf(roomBelow)) ||
+                            aRoom.hasExitTo(currentWorld.wrappingRoomRightOf(roomBelow))
+                        ) {
+                            hasDiagonalPaths = true;
                             break;
-                        case 1:
-                            // Activate path after room:
-                            for (const spacerPath of document.querySelectorAll(`.has-path[data-path-from-room-id="${shortestPath[i - 1]}"][data-path-to-room-id="${shortestPath[i]}"]`)) {
-                                spacerPath.classList.add('found-path-spacer-highlighting');
-                            }
+                        }
+                    }
+                    if (hasDiagonalPaths) break;
+                }
+                if (currentWorld.sideLength > 1) {
+                    for (let i = 0; i < totalRows; i++) {
+                        const aRoom = currentWorld.getRoomById(i * currentWorld.sideLength + 1);
+                        const roomLeft = currentWorld.wrappingRoomLeftOf(aRoom);
+                        if (
+                            aRoom.hasExitTo(roomLeft) ||
+                            (hasDiagonalPaths && (
+                                aRoom.hasExitTo(currentWorld.wrappingRoomAboveOf(roomLeft)) ||
+                                aRoom.hasExitTo(currentWorld.wrappingRoomBelowOf(roomLeft))
+                            ))
+                        ) {
+                            hasHorizontalWrapping = true;
                             break;
-                        case 2:
-                            // Activate path before next room:
-                            for (const spacerPath of document.querySelectorAll(`.has-path[data-path-from-room-id="${shortestPath[i]}"][data-path-to-room-id="${shortestPath[i - 1]}"]`)) {
-                                spacerPath.classList.add('found-path-spacer-highlighting');
-                            }
+                        }
+                    }
+                }
+                if (totalRows > 1) {
+                    for (let i = 0; i < currentWorld.sideLength; i++) {
+                        const aRoom = currentWorld.getRoomById(i + 1);
+                        const roomAbove = currentWorld.wrappingRoomAboveOf(aRoom);
+                        if (
+                            aRoom.hasExitTo(roomAbove) ||
+                            (hasDiagonalPaths && (
+                                aRoom.hasExitTo(currentWorld.wrappingRoomLeftOf(roomAbove)) ||
+                                aRoom.hasExitTo(currentWorld.wrappingRoomRightOf(roomAbove))
+                            ))
+                        ) {
+                            hasVerticalWrapping = true;
                             break;
+                        }
+                    }
+                }
+                console.log(
+                    'A* Distance Calculation Parameters:',
+                    '\nhasDiagonalPaths', hasDiagonalPaths,
+                    '\nhasHorizontalWrapping', hasHorizontalWrapping,
+                    '\nhasVerticalWrapping', hasVerticalWrapping
+                );
+            }
+
+            const dijkstraInfo = DijkstraAlternative(currentWorld, pathfinderStart, pathfinderEnd, {
+                // Get back info about what rooms were scanned and in what order:
+                trackQueue: pathfinderVisualize.checked,
+                // Use distance estimate to the end point to improve the algorithm (changes "dijkstra" to "A*" since they are otherwise the same):
+                aStar: shouldUseAStar,
+                // Set this to true to see how the pathfinding algorithm explores all rooms from the specified starting location (can be useful to see what room is explored last):
+                continueAfterFindingEnd: pathfinderVisualizeDijkstraToEnd.checked,
+                // Function used to calculate distance from a room to the end point when using "A*":
+                aStarDistanceToEndFrom: function (roomId) {
+                    const fromRow = Math.floor((roomId - 1) / currentWorld.sideLength);
+                    const fromColumn = (roomId - 1) % currentWorld.sideLength;
+                    let xDist = Math.abs(fromColumn - toColumn);
+                    let yDist = Math.abs(fromRow - toRow);
+
+                    if (hasVerticalWrapping) {
+                        // If before you needed to go 8 out of 9 rows you now need to go only 1 row in the opposite direction:
+                        const wrappingYDist = totalRows - yDist;
+                        if (wrappingYDist < yDist) {
+                            yDist = wrappingYDist;
+                        }
+                    }
+                    if (hasHorizontalWrapping) {
+                        // If before you needed to go 8 out of 9 columns you now need to go only 1 column in the opposite direction:
+                        const wrappingXDist = currentWorld.sideLength - xDist;
+                        if (wrappingXDist < xDist) {
+                            xDist = wrappingXDist;
+                        }
+                    }
+                    if (hasDiagonalPaths) {
+                        // Can make both x and y movement in a single step (assumes that all diagonal paths have length 1)
+                        if (xDist < yDist) {
+                            xDist = 0;
+                        } else {
+                            yDist = 0;
+                        }
                     }
 
-                    currentStep++;
-                }
-            };
-            pathfindingIntervalId = setInterval(doStep, frameTime);
-            // Do first step immediately:
-            doStep();
-        } else {
-            for (let i = 0; i < shortestPath.length; i++) {
-                for (const roomPath of document.querySelectorAll(`.room[data-room-id="${shortestPath[i]}"]`)) {
-                    roomPath.classList.add('found-path-room-highlighting');
-                }
-                if (i !== 0) {
-                    for (const spacerPath of document.querySelectorAll(`.has-path[data-path-from-room-id="${shortestPath[i - 1]}"][data-path-to-room-id="${shortestPath[i]}"]`)) {
-                        spacerPath.classList.add('found-path-spacer-highlighting');
-                    }
-                    for (const spacerPath of document.querySelectorAll(`.has-path[data-path-from-room-id="${shortestPath[i]}"][data-path-to-room-id="${shortestPath[i - 1]}"]`)) {
-                        spacerPath.classList.add('found-path-spacer-highlighting');
-                    }
-                }
+                    return xDist + yDist;
+                },
+            });
+            if (dijkstraInfo) {
+                shortestPath = dijkstraInfo.pathToExit;
             }
+            console.log('Dijkstra/A* pathfinding completed after ', Date.now() - startTime, ' ms');
+
+            showShortestPathInfo();
+
+            // Highlight the rooms searched by the pathfinding algorithm:
+            pathHighlight({
+                animationTime: pathfindingAnimationTime,
+                compensateForLag: false,
+                roomsCount: dijkstraInfo.trackedQueue.length,
+                pathsPerRoom: 2,
+                getRoom: function (i) {
+                    return dijkstraInfo.trackedQueue[i];
+                },
+                getPathStart: function (i, pathIndex) {
+                    if (pathIndex === 0) {
+                        // First path starts in previous room (indicates a path towards current room):
+                        return dijkstraInfo.previous[dijkstraInfo.trackedQueue[i] - 1];
+                    } else {
+                        // 2nd path starts in current room (indicates a path from current room towards the previous):
+                        return dijkstraInfo.trackedQueue[i];
+                    }
+                },
+                getPathEnd: function (i, pathIndex) {
+                    if (pathIndex === 0) {
+                        // The first path indicates a path towards the current room:
+                        return dijkstraInfo.trackedQueue[i];
+                    } else {
+                        // The second path indicates a path back towards the previous room:
+                        return dijkstraInfo.previous[dijkstraInfo.trackedQueue[i] - 1];
+                    }
+                },
+
+                done: function () {
+                    clearPathHighlight();
+                    highlightToExit();
+                },
+            });
         }
     }
     else {
@@ -390,7 +743,7 @@ const preview = document.getElementById('row-container');
 preview.addEventListener('click', function (e) {
     // console.log("Preparing View");
     const roomId = e.target.getAttribute('data-room-id');
-    console.log('Clicked on: ', roomId);
+    // console.log('Clicked on: ', roomId);
     if (roomId === undefined || roomId === null) {
         // console.log("room ID invalid, didn't click on a room");
         if (!isPathfinding) {
@@ -434,10 +787,11 @@ preview.addEventListener('click', function (e) {
 
                     if (previousRoom.hasExitTo(room)) {
                         // Rooms are already connected, so disconnect them:
-                        console.log('pr', previousRoom, room);
+                        // console.log('disconnect paths', previousRoom, room);
                         previousRoom.disconnectFrom(room);
                         updateCurrentUi();
-                    } else if (currentWorld.isWrappingNeighbors(previousRoom, room)) {
+                    } else if (currentWorld.isWrappingNeighbors(previousRoom, room) || currentWorld.isWrappingDiagonalNeighbors(previousRoom, room)) {
+                        // console.log('connect paths');
                         // Rooms are close, so connect them:
                         previousRoom.connectTo(room);
                         updateCurrentUi();
@@ -478,40 +832,50 @@ preview.addEventListener('click', function (e) {
 
 let lastMouseEvent = null;
 let lastMouseRoomId = null;
+let lastMouseExactRoomId = null;
 function mouseMove(e) {
     let didChange = false;
     if (e.target) {
         const roomId = e.target.getAttribute('data-room-id');
-        if (roomId) {
-            const room = currentWorld.getRoomById(roomId);
-            if (currentEditMode === 'smart') {
-                if (!room.canEnter) {
-                    room.canEnter = true;
-                    didChange = true;
+        const handleRoomId = function (roomId, previousRoomId) {
+            if (roomId) {
+                const room = currentWorld.getRoomById(roomId);
+                if (currentEditMode === 'smart') {
+                    if (!room.canEnter) {
+                        room.canEnter = true;
+                        didChange = true;
+                    }
+                    if (previousRoomId !== null) {
+                        const lastRoom = currentWorld.getRoomById(previousRoomId);
+                        if (
+                            !lastRoom.hasExitTo(room) &&
+                            (
+                                currentWorld.isWrappingNeighbors(lastRoom, room) ||
+                                currentWorld.isWrappingDiagonalNeighbors(lastRoom, room)
+                            )
+                        ) {
+                            lastRoom.connectTo(room);
+                            didChange = true;
+                        }
+                    }
                 }
-                if (lastMouseRoomId !== null) {
-                    const lastRoom = currentWorld.getRoomById(lastMouseRoomId);
-                    if (!lastRoom.hasExitTo(room) && currentWorld.isWrappingNeighbors(lastRoom, room)) {
-                        lastRoom.connectTo(room);
+                if (currentEditMode === 'eraser') {
+                    if (room.canEnter) {
+                        room.canEnter = false;
+                        currentWorld.blockRoom(room);
                         didChange = true;
                     }
                 }
-                lastMouseRoomId = roomId;
             }
-            if (currentEditMode === 'eraser') {
-                if (room.canEnter) {
-                    room.canEnter = false;
-                    currentWorld.blockRoom(room);
-                    didChange = true;
-                }
-                if (lastMouseRoomId !== null) {
-                    const lastRoom = currentWorld.getRoomById(lastMouseRoomId);
-                    if (lastRoom.hasExitTo(room) && currentWorld.isWrappingNeighbors(lastRoom, room)) {
-                        lastRoom.disconnectFrom(room);
-                        didChange = true;
-                    }
-                }
-                lastMouseRoomId = roomId;
+        };
+        if (roomId) {
+            handleRoomId(roomId, lastMouseRoomId);
+            lastMouseRoomId = roomId;
+
+            // More exact room id (only triggers when moving mouse over a room div and not over spacers, useful for diagonal paths):
+            if (e.target.classList.contains('room')) {
+                handleRoomId(roomId, lastMouseExactRoomId);
+                lastMouseExactRoomId = roomId;
             }
         }
     }
@@ -526,6 +890,7 @@ function stopDrag(cancel = true) {
     // If !cancel then maybe do something special?
     lastMouseEvent = null;
     lastMouseRoomId = null;
+    lastMouseExactRoomId = null;
     preview.removeEventListener('mouseover', mouseMove);
 }
 preview.addEventListener('mousedown', function (e) {
@@ -584,6 +949,31 @@ function showInfoAboutRoom(room) {
 
 let saveTheWorldTimeoutId = null;
 function saveWorldEdits() {
+    const onSuccess = function () {
+        if (saveTheWorldTimeoutId !== null) {
+            clearTimeout(saveTheWorldTimeoutId);
+            saveTheWorldTimeoutId = null;
+        }
+        // Typical action to be performed when the document is ready:
+        roomInfoDisplay.style.visibility = 'visible';
+        const shownText = 'Saved the world'
+        roomHeaderDisplay.textContent = shownText;
+
+        saveTheWorldTimeoutId = setTimeout(function () {
+            saveTheWorldTimeoutId = null;
+            if (roomHeaderDisplay.textContent === shownText) {
+                roomInfoDisplay.style.visibility = 'hidden';
+            }
+        }, 5000);
+    };
+
+    if (offlineMode) {
+        const worldKey = 'pathOS_world-' + viewedWorldId;
+        localStorage.setItem(worldKey, JSON.stringify(currentWorld));
+        setTimeout(function () { onSuccess(); }, 100);
+        return;
+    }
+
     let xhr = (window.XMLHttpRequest) ? new XMLHttpRequest() : new activeXObject("Microsoft.XMLHTTP");
     xhr.open('put', 'http://localhost:8000/api/worlds/' + viewedWorldId, true);
     xhr.send(JSON.stringify({
@@ -593,21 +983,7 @@ function saveWorldEdits() {
     xhr.onreadystatechange = function () {
         if (this.readyState == 4) {
             if (this.status == 200) {
-                if (saveTheWorldTimeoutId !== null) {
-                    clearTimeout(saveTheWorldTimeoutId);
-                    saveTheWorldTimeoutId = null;
-                }
-                // Typical action to be performed when the document is ready:
-                roomInfoDisplay.style.visibility = 'visible';
-                const shownText = 'Saved the world'
-                roomHeaderDisplay.textContent = shownText;
-
-                saveTheWorldTimeoutId = setTimeout(function () {
-                    saveTheWorldTimeoutId = null;
-                    if (roomHeaderDisplay.textContent === shownText) {
-                        roomInfoDisplay.style.visibility = 'hidden';
-                    }
-                }, 5000);
+                onSuccess();
             } else {
                 console.error('Backend failed:\n', xhr.responseText);
             }
