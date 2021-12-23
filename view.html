@@ -16,13 +16,20 @@
         #pathfinder-btn.off ,#edit-btn.off, #room-display.off {
             display: none;
         }
-        /*Change span element font-size used for the world title only here*/
+        /*Changes span element font-size used for the world title only here*/
         span {
             font-size: 2vw;
         }
         button {
             font-size: 2vw;
             height: 5vw;
+        }
+        /*Makes contrasting checkbox border for the configs used in the info display when pathfinding*/
+        input[type="checkbox"]:checked {
+            border: 2px solid #000000;
+        }
+        input[type="checkbox"] {
+            border: 2px solid #000000;
         }
     </style>
     <title>Path OS - View</title>
@@ -47,6 +54,28 @@
     </div>
     <div id="room-display" style="text-align: center;">
         <p id="room-display-name">The bloody hallway of happiness</p>
+        <div class="pathfinder-options">
+            <hr>
+            <div class="pathfinder-option-flex-block">
+                <label>Pathfinder Method: </label>
+                <button class="pathfinder-algorithm-configs" id="pathfinder-method-dijkstra">Dijkstra</button>
+                <button class="pathfinder-algorithm-configs" id="pathfinder-method-a-star">A*</button>
+                <button class="pathfinder-algorithm-configs" id="pathfinder-method-spf">SPF</button>
+                <button class="pathfinder-algorithm-configs" id="pathfinder-method-spf-fast">SPF Fast</button>
+            </div>
+            <div class="pathfinder-option-flex-block">
+                <label for="visualize-pathfinder-method">Visualize Pathfinder Method:</label>
+                <input id="visualize-pathfinder-method" type="checkbox" checked />
+            </div>
+            <div class="pathfinder-option-flex-block">
+                <label for="visualize-dijkstra-to-end">Visualize A* and Dijkstra to the very end:</label>
+                <input id="visualize-dijkstra-to-end" type="checkbox" />
+            </div>
+            <div class="pathfinder-option-flex-block">
+                <label for="visualize-spf-all-paths">Visualize SPF in more detail:</label>
+                <input id="visualize-spf-all-paths" type="checkbox" />
+            </div>
+        </div>
         <div class="room-info">
             <div id="room-info-id">
                 <p>Id:</p>
@@ -57,6 +86,7 @@
                 <p id="room-display-exits"></p>
             </div>
         </div>
+    </div>
     <!-- </div>
     <div id="pathfinder-display" style="text-align: center;">
         <p id="Pathfinder-selectS">Select Start</p>
@@ -66,14 +96,14 @@
     <script type="text/javascript" src="god.js"></script>
     <script type="text/javascript" src="display.js"></script>
     <script type="text/javascript" src="view.js"></script>
-    <script type="text/javascript">
+    <!-- <script type="text/javascript">
         document.querySelectorAll(".room").forEach(room => {
             room.addEventListener("mouseenter", function(e) {
                 const roomId = e.currentTarget.getAttribute('data-room-id');
-                console.log(roomId);
+                // console.log(roomId);
             })
         })
-    </script>
+    </script> -->
 </body>
 
 </html>
