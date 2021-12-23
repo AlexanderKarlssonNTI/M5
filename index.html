@@ -88,8 +88,133 @@
         </div>
     </div>
     <div class="menu-buttons">
-        <button class="menu-btn" onclick="window.location.href='create.html'">Create</button>
+        <div class="create-alternatives">
+            <button class="menu-btn menu-create-btn" onclick="window.location.href='create.html'">Create</button>
+            <button id="random-world-btn" onclick="randomWorld()">Random world</button>
+        </div>
         <button class="menu-btn" onclick="window.location.href='load.html'">Load</button>
     </div>
+    <button id="offline-mode">Offline<br>mode</button>
+    <script type="text/javascript" src="god.js"></script>
+    <script type="text/javascript" src="maze.js"></script>
+    <script>
+        const offlineButton = document.getElementById('offline-mode');
+
+        let offlineMode = localStorage.getItem('pathOS_offlineModeEnabled') === 'true';
+        offlineButton.classList.toggle('selected', offlineMode);
+
+        offlineButton.onclick = function() {
+            offlineMode = !offlineMode;
+            localStorage.setItem('pathOS_offlineModeEnabled', offlineMode);
+            offlineButton.classList.toggle('selected', offlineMode);
+        };
+
+
+    function randomWorld() {
+        const availableTypes = ['circle', 'rectangle', 'branch-alternative'];
+        let randomlyEnabledMazeMode = false;
+        let randomlySelectedType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+        if (randomlySelectedType === 'rectangle') {
+            randomlyEnabledMazeMode = Math.random() < 0.5;
+        }
+
+        let minCircle = 2;
+        let maxCircle = 100;
+
+        let minRectangle = 2;
+        let maxRectangle = 100;
+        let maxRectangleTotalRooms = 1000;
+
+        let minBranchStartLength = 7;
+        let maxBranchStartLength = 200;
+        let minBranchFactor = 0.2;
+
+        let relevantRandomInput = null;
+        if (randomlySelectedType === 'circle') {
+            relevantRandomInput = [Math.floor(Math.random() * (maxCircle + 1 - minCircle) + minCircle)];
+        } else if (randomlySelectedType === 'rectangle') {
+            const width = Math.floor(Math.random() * (maxRectangle + 1 - minRectangle) + minRectangle);
+            const maxHeight = Math.floor(maxRectangleTotalRooms / width);
+            const height = Math.floor(Math.random() * (maxHeight + 1 - minRectangle) + minRectangle);
+            relevantRandomInput = [width, height];
+        } else {
+            const branchStartLength = Math.floor(Math.random() * (maxBranchStartLength + 1 - minBranchStartLength) + minBranchStartLength);
+            const branchFactor = Math.random() * (1 - minBranchFactor) + minBranchFactor;
+            relevantRandomInput = [branchStartLength, branchFactor];
+        }
+
+        let currentWorld = new World(WorldBaptist(), randomlySelectedType, ...relevantRandomInput);
+        if (randomlyEnabledMazeMode) {
+            const maze = new MazeBuilder(...relevantRandomInput);
+            for (let y = 1; y < maze.maze.length; y += 2) {
+                const roomY = (y - 1) / 2;
+                const row = maze.maze[y];
+                // console.log(roomY, row, y + 1 < maze.maze.length ? maze.maze[y + 1] : null);
+
+                // Horizontal walls
+                for (let x = 2; x < row.length; x += 2) {
+                    const roomX = (x - 2) / 2;
+                    const roomBefore = currentWorld.getRoomById(roomY * currentWorld.sideLength + roomX + 1);
+                    const roomAfter = currentWorld.getRoomById(roomY * currentWorld.sideLength + roomX + 1 + 1);
+                    if (!roomBefore || !roomAfter) continue;
+                    if (row[x] && row[x].includes("wall")) {
+                        roomBefore.disconnectFrom(roomAfter);
+                    }
+                }
+                // Vertical walls
+                if (y + 1 < maze.maze.length) {
+                    const nextRow = maze.maze[y + 1];
+                    for (let x = 1; x < nextRow.length; x += 2) {
+                        const roomX = (x - 1) / 2;
+                        const room = currentWorld.getRoomById(roomY * currentWorld.sideLength + roomX + 1);
+                        const roomBelow = currentWorld.getRoomById((roomY + 1) * currentWorld.sideLength + roomX + 1);
+                        if (!room || !roomBelow) continue;
+                        if (nextRow[x] && nextRow[x].includes("wall")) {
+                            room.disconnectFrom(roomBelow);
+                        }
+                    }
+                }
+            }
+            currentWorld.type = 'maze';
+        }
+
+        const offlineMode = localStorage.getItem('pathOS_offlineModeEnabled') === 'true';
+
+        if (offlineMode) {
+            const worldIds = JSON.parse(localStorage.getItem('pathOS_worlds') || '[]');
+            let id = 1;
+            while (worldIds.includes('pathOS_world-' + id)) {
+                id++;
+            }
+            const worldKey = 'pathOS_world-' + id;
+            worldIds.push(worldKey);
+            localStorage.setItem(worldKey, JSON.stringify(currentWorld));
+            localStorage.setItem('pathOS_worlds', JSON.stringify(worldIds));
+
+            location.href = 'view.html?id=' + id;
+            return;
+        }
+
+        let xhr = (window.XMLHttpRequest) ? new XMLHttpRequest() : new activeXObject("Microsoft.XMLHTTP");
+        xhr.open('post', 'http://localhost:8000/api/create', true);
+        xhr.send(JSON.stringify({
+            type: wantedWorldType,
+            world: currentWorld,
+        }));
+
+        xhr.onreadystatechange = function () {
+            if (this.readyState == 4) {
+                if (this.status == 200) {
+                    const createdInfo = JSON.parse(xhr.responseText);
+                    console.log(createdInfo);
+                    // Typical action to be performed when the document is ready:
+                    location.href = 'view.html?id=' + createdInfo.id;
+                } else {
+                    console.error('Backend failed:\n', xhr.responseText);
+                }
+            }
+        };
+    }
+    </script>
 </body>
 </html>
