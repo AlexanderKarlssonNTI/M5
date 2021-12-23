@@ -75,6 +75,7 @@ class World {
                 this.generateRectangleWorld(parameter1, parameter2);
                 break;
             case "branch":
+                this.type = 'branch*';
                 this.generateBranchWorld(parameter1, parameter2);
                 break;
             case "branch-alternative":
@@ -254,6 +255,7 @@ class World {
 
 
     wrappingRoomLeftOf(room) {
+        if (!room) return null;
         let id = room.ID - 1;
         if ((room.ID - 1) % this.sideLength == 0) {
             // First room
@@ -265,6 +267,7 @@ class World {
         return this.rooms[id - 1];
     }
     wrappingRoomRightOf(room) {
+        if (!room) return null;
         let id = room.ID + 1;
         if ((room.ID % this.sideLength) == 0) {
             // last room
@@ -276,6 +279,7 @@ class World {
         return this.rooms[id - 1];
     }
     wrappingRoomAboveOf(room) {
+        if (!room) return null;
         const nonWrapping = this.roomAboveOf(room);
         if (nonWrapping === null) {
             const rows = Math.ceil(this.rooms.length / this.sideLength);
@@ -290,6 +294,7 @@ class World {
         }
     }
     wrappingRoomBelowOf(room) {
+        if (!room) return null;
         const nonWrapping = this.roomBelowOf(room);
         if (nonWrapping === null) {
             // colum offset for specified room:
@@ -300,6 +305,7 @@ class World {
         }
     }
     roomLeftOf(room) {
+        if (!room) return null;
         const id = room.ID - 1;
         if ((room.ID - 1) % this.sideLength == 0) {
             // First room
@@ -308,6 +314,7 @@ class World {
         return this.rooms[id - 1];
     }
     roomRightOf(room) {
+        if (!room) return null;
         const id = room.ID + 1;
         if ((room.ID % this.sideLength) == 0) {
             // last room
@@ -316,6 +323,7 @@ class World {
         return this.rooms[id - 1];
     }
     roomAboveOf(room) {
+        if (!room) return null;
         const id = room.ID - this.sideLength;
         if (id <= 0) {
             return null;
@@ -323,6 +331,7 @@ class World {
         return this.rooms[id - 1];
     }
     roomBelowOf(room) {
+        if (!room) return null;
         const id = room.ID + this.sideLength;
         if (id > this.rooms.length) {
             return null;
@@ -336,14 +345,31 @@ class World {
         room.disconnectFrom(this.wrappingRoomBelowOf(room));
         room.disconnectFrom(this.wrappingRoomLeftOf(room));
         room.disconnectFrom(this.wrappingRoomRightOf(room));
+
+        for (const exitId of room.exits) {
+            room.disconnectFrom(this.getRoomById(exitId));
+        }
+
         room.canEnter = false;
     }
     isWrappingNeighbors(roomA, roomB) {
+        if (!roomA || !roomB) return false;
         return this.wrappingRoomLeftOf(roomA) === roomB ||
             this.wrappingRoomRightOf(roomA) === roomB ||
             this.wrappingRoomAboveOf(roomA) === roomB ||
             this.wrappingRoomBelowOf(roomA) === roomB;
     }
+    isWrappingDiagonalNeighbors(roomA, roomB) {
+        if (!roomA || !roomB) return false;
+
+        const above = this.wrappingRoomAboveOf(roomA);
+        const below = this.wrappingRoomBelowOf(roomA);
+        return this.wrappingRoomLeftOf(above) === roomB ||
+            this.wrappingRoomRightOf(above) === roomB ||
+            this.wrappingRoomLeftOf(below) === roomB ||
+            this.wrappingRoomRightOf(below) === roomB;
+    }
+
 
     getRoomById(roomId) {
         switch (typeof roomId) {
@@ -422,9 +448,9 @@ class World {
 }
 
 function WorldBaptist() {
-    const adj = ["bloody", "bleak", "dark", "heavenly", "hellish", "beautiful", "holy", "lovely", "empty","happy","apocalyptic","dystopic","utopic","wacky","stupid","idiotic"];
-    const plc = ["plane", "world", "place","kingdom","village","city","refuge","camp"];
-    const dsc = ["death", "despair", "hopelessness", "horror", "happiness", "joy", "bliss", "business", "love", "sin", "corruption", "struggle","nostalgia","isolation"];
+    const adj = ["bloody", "bleak", "dark", "heavenly", "hellish", "beautiful", "holy", "lovely", "empty", "happy", "apocalyptic", "dystopic", "utopic", "wacky", "stupid", "idiotic"];
+    const plc = ["plane", "world", "place", "kingdom", "village", "city", "refuge", "camp"];
+    const dsc = ["death", "despair", "hopelessness", "horror", "happiness", "joy", "bliss", "business", "love", "sin", "corruption", "struggle", "nostalgia", "isolation"];
     let word1 = adj[Math.floor(Math.random() * adj.length)];
     let word2 = plc[Math.floor(Math.random() * plc.length)];
     let word3 = dsc[Math.floor(Math.random() * dsc.length)];
@@ -437,42 +463,92 @@ function WorldBaptist() {
     }
 }
 
-function SPF(world, startID, endID) {
+function* SPF(world, startID, endID, options = null) {
+    if (!options) {
+        options = {};
+    }
     if (startID > 0 && endID > 0 && startID <= world.rooms.length && endID <= world.rooms.length) {
-        let checking = [[startID]];
-        let solved = [];
+        let timeCounter = 0;
+        let startTime = Date.now();
+
+        /// Stores the length of the shortest path to a room (shortestPathToRoomYet[roomId - 1] === shortestPathToRoomLength):
+        const shortestPathToRoomYet = options.trackShortestPaths ? new Array(world.rooms.length).fill(null) : null;
+        const checking = [[startID]];
         while (checking.length > 0) {
-            let newCheck = [];
-            for (const path of checking) {
-                let lastroom = path[path.length - 1];
-                let exits = world.rooms[lastroom - 1].exits;
-                for (let i = 0; i < exits.length; i++) {
-                    let temp = [];
-                    let exit = world.rooms[lastroom - 1].exits[i];
-                    if (exit == endID) {
-                        temp = path.slice();
+            // Process a path:
+            const path = checking.shift();
+
+            // Consider the exits of the path's last room, that is to say where
+            // the path could continue:
+            const lastRoomId = path[path.length - 1];
+            const lastRoom = world.rooms[lastRoomId - 1];
+            const exits = lastRoom.exits;
+            for (let i = 0; i < exits.length; i++) {
+                const exit = exits[i];
+                if (exit == endID) {
+                    // Found a path to the exit:
+                    const temp = (i + 1 === exits.length) ? path : path.slice();
+                    temp.push(exit);
+                    yield temp;
+                    continue;
+                }
+                if (shortestPathToRoomYet && shortestPathToRoomYet[exit - 1] !== null && shortestPathToRoomYet[exit - 1] <= path.length) {
+                    // We have already found a path that gets us to this room in
+                    // the same number of steps or fewer, so this path won't
+                    // shorten the distance to the exit:
+                    if (options.yieldPartialPaths) {
+                        const temp = (i + 1 === exits.length) ? path : path.slice();
                         temp.push(exit);
-                        solved.push(temp.slice());
+                        yield temp;
                     }
-                    else if (!path.includes(exit)) {
-                        temp = path.slice();
+                    continue;
+                }
+                if (path.includes(exit)) {
+                    // This path already goes through this room so going back
+                    // into it would just mean we went somewhere else for no reason,
+                    // therefore we don't need to consider such a path:
+                    if (options.yieldPartialPaths) {
+                        const temp = (i + 1 === exits.length) ? path : path.slice();
                         temp.push(exit);
-                        newCheck.push(temp.slice());
+                        yield temp;
                     }
+                    continue;
+                }
+                // A path through this room might lead to the exit, consider it later:
+
+                if (shortestPathToRoomYet) {
+                    shortestPathToRoomYet[exit - 1] = path.length;
+                }
+
+                // Optimization: only make a copy of path if there are actually more exits that need it:
+                const temp = (i + 1 === exits.length) ? path : path.slice();
+
+                temp.push(exit);
+                checking.push(temp);
+            }
+
+            // Make sure we don't get stuck doing too much work:
+            if (options.maxProcessTime !== undefined && ++timeCounter > options.roomsToScanBeforeCheckingTime) {
+                timeCounter = 0;
+                if ((Date.now() - startTime) > options.maxProcessTime) {
+                    yield 'longTime';
+                    startTime = Date.now();
                 }
             }
-            checking = newCheck.slice();
         }
-        return solved;
     }
     else {
         console.error("Invalid parameter/s");
     }
 }
 
-function DijkstraAlternative(world, startID, endID) {
+function DijkstraAlternative(world, startID, endID, options = null) {
     // Inspired by pseudo-code from wikipedia:
     // https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm#Pseudocode
+
+    if (!options || typeof options !== 'object') {
+        options = {};
+    }
 
     if (startID <= 0 && endID <= 0 && startID > world.rooms.length && endID > world.rooms.length) {
         console.error("Invalid parameter/s");
@@ -484,9 +560,21 @@ function DijkstraAlternative(world, startID, endID) {
     // The room you come from when following the shortest path to a room (previous[roomId - 1] === neighborIdThatLeadsTowardsStart):
     const previous = new Array(world.rooms.length).fill(null);
 
+    // Minimum total path length (from start to finish) if that path goes through a specific room (minTotalDistance[roomId - 1] === minimumLengthOfShortestPath):
+    const minTotalDistance = options.aStar ? new Array(world.rooms.length).fill(null) : null;
+
+    if (options.aStar) {
+        minTotalDistance[startID - 1] = options.aStarDistanceToEndFrom(startID);
+    }
     distance[startID - 1] = 0;
     // Anything in queue must have a distance (and preferably the ones closer to the start should have smaller distances)
     let queue = [startID];
+
+    let trackedQueue = [];
+    if (options.trackQueue) {
+        trackedQueue.push(startID);
+    }
+
 
     while (queue.length > 0) {
         // We ensure that the first element in queue has the lowest distance (of all unvisited rooms)
@@ -501,17 +589,64 @@ function DijkstraAlternative(world, startID, endID) {
 
             if (shortestDistanceToNeighborSoFar === null || fullPathToNeighborDistance < shortestDistanceToNeighborSoFar) {
                 // Ignore blocked rooms:
-                // if (!world.rooms[neighborId - 1].canEnter) continue;
+                if (!world.rooms[neighborId - 1].canEnter) continue;
 
                 distance[neighborId - 1] = fullPathToNeighborDistance;
                 previous[neighborId - 1] = currentId;
 
-                // Keep track of what rooms have distances (also since neighbors are always 1 unit
-                // apart and we visit neighbors of the earlier rooms first we know that every previous
-                // room in the queue has a shorter distance then this newly added room):
-                queue.push(neighborId);
+                // Add `neighborId` to queue in a way so that the queue remains sorted.
+                // When using A * it should be sorted based on `minTotalDistance`
+                // and when using Dijkstra it should be sorted based on `distance`
+                let addLast = true;
+                if (options.aStar) {
+                    // Calculate and store the minimum total distance for paths
+                    // that go through the neighbor room:
+                    const neighborMinTotalDistance = fullPathToNeighborDistance + options.aStarDistanceToEndFrom(neighborId);
+                    minTotalDistance[neighborId - 1] = neighborMinTotalDistance;
 
-                if (neighborId === endID) {
+                    // Since we should search closer and closer to the exit we
+                    // should hopefully be able to insert new search positions
+                    // early in the queue. (so not that bad idea to start with
+                    // low index and search towards higher instead of doing the
+                    // opposite)
+                    for (let i = 0; i < queue.length; i++) {
+                        if (minTotalDistance[queue[i] - 1] > neighborMinTotalDistance) {
+                            // Insert before this element (since it is larger then the one we want to insert):
+                            if (options.trackQueue) {
+                                trackedQueue.splice(trackedQueue.length - queue.length + i, 0, neighborId);
+                            }
+                            queue.splice(i, 0, neighborId);
+                            addLast = false;
+                            break;
+                        }
+                    }
+                } else {
+                    // Since neighbors are always 1 unit apart and we visit neighbors
+                    // of the earlier rooms first we know that every previous room in
+                    // the queue has a shorter distance then this newly added room
+                    // so we can add it last.
+                    //
+                    // We will basically scan all rooms with distance `x` and only
+                    // add new rooms with to distance `x + 1` to the queue. Then
+                    // after all rooms with distance `x` has been scanned we continue
+                    // scanning all rooms with distance `x + 1` in the same way
+                    // while only adding rooms with distance `x + 2`.
+                    //
+                    // If the distance between rooms isn't always 1 then we could
+                    // not just add it last in the queue (for example first neighbor
+                    // of startID could have a diagonal path that is longer and then
+                    // when we add non-diagonal path for another neighbor of startID
+                    // it would have a shorter distance then that diagonal room and
+                    // so would need to be inserted before it in the queue).
+                }
+                if (addLast) {
+                    queue.push(neighborId);
+                    if (options.trackQueue) {
+                        trackedQueue.push(neighborId);
+                    }
+                }
+
+                if (neighborId === endID && !options.continueAfterFindingEnd) {
                     // Found a path to the exit (also since we always visit rooms using the shortest path
                     // first we won't find a shorter path than this):
                     queue = [];
@@ -538,8 +673,14 @@ function DijkstraAlternative(world, startID, endID) {
     }
     pathToExit.unshift(startID);
 
-    return pathToExit;
+    return {
+        pathToExit,
+        previous,
+        distance,
+        trackedQueue,
+    };
 }
+
 function Dijkstra(world, startID, endID) {
     if (startID > 0 && endID > 0 && startID <= world.rooms.length && endID <= world.rooms.length) {
         let visited = [startID];
