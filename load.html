@@ -43,8 +43,32 @@
     <script type="text/javascript" src="god.js"></script>
     <script>
         // Start loading as soon as possible:
-        const loadingAllWorlds = fetch('http://localhost:8000/api/load')
-            .then(function (response) { return response.json(); });
+        let loadingAllWorlds = null;
+        const offlineMode = localStorage.getItem('pathOS_offlineModeEnabled') === 'true';
+        if (offlineMode) {
+            loadingAllWorlds = (async function() {
+                const worldIds = JSON.parse(localStorage.getItem('pathOS_worlds') || '[]');
+                const worlds = worldIds.map(function(id) {
+                        const data = JSON.parse(localStorage.getItem(id));
+                        let roomActiveAmount = 0;
+                        for (const room of data.rooms) {
+                            if (room.canEnter) {
+                                roomActiveAmount++;
+                            }
+                        }
+                        data.roomActiveAmount = roomActiveAmount;
+                        data.id = id.slice('pathOS_world-'.length);
+                        return data;
+                    });
+                worlds.sort(function (a, b) {
+                    return  parseInt(b.id) - parseInt(a.id);
+                });
+                return { worlds, };
+            })();
+        } else {
+            loadingAllWorlds = fetch('http://localhost:8000/api/load')
+                .then(function (response) { return response.json(); });
+        }
     </script>
     <title>Path OS - Load</title>
 </head>

@@ -68,6 +68,26 @@ function loadWorld() {
 }
 
 function deleteSelectedWorld(selectedWorld) {
+    const onSuccess = function () {
+        // remove selected world
+        const elements = document.querySelectorAll(`[data-world-id="${selectedWorld}"]`);
+        for (const element of elements) {
+            element.parentElement.removeChild(element);
+        }
+    };
+    if (offlineMode) {
+        // Update list of worlds that are stored in local storage:
+        let worldIds = JSON.parse(localStorage.getItem('pathOS_worlds') || '[]');
+        worldIds = worldIds.filter(function (id) {
+            return String(id) != String('pathOS_world-' + selectedWorld);
+        });
+        localStorage.setItem('pathOS_worlds', JSON.stringify(worldIds));
+
+        // Remove the specified world:
+        localStorage.removeItem('pathOS_world-' + selectedWorld);
+        onSuccess();
+        return;
+    }
     fetch('http://localhost:8000/api/worlds/' + selectedWorld + "/delete", {
         method: 'DELETE',
         headers: {
@@ -75,12 +95,8 @@ function deleteSelectedWorld(selectedWorld) {
         },
         body: JSON.stringify({id: selectedWorld})
     })
-    .then(function() {
-        // remove selected world
-        const elements = document.querySelectorAll(`[data-world-id="${selectedWorld}"]`);
-        for (const element of elements) {
-            element.parentElement.removeChild(element);
-        }
+    .then(function () {
+        onSuccess();
     })
     .catch(function(error) {
         console.error('Failed to remove world:\n', error);
@@ -105,6 +121,13 @@ function reshuffleName() {
             label.textContent = newName;
         }
 
+
+        if (offlineMode) {
+            const previousData = JSON.parse(localStorage.getItem('pathOS_world-' + world.id));
+            previousData.name = newName;
+            localStorage.setItem('pathOS_world-' + world.id, JSON.stringify(previousData));
+            return;
+        }
 
         let xhr = (window.XMLHttpRequest) ? new XMLHttpRequest() : new activeXObject("Microsoft.XMLHTTP");
         xhr.open('put', 'http://localhost:8000/api/worlds/' + selectedWorld, true);
