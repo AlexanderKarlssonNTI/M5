@@ -100,6 +100,9 @@ button {
 button:active {
     background-color: var(--light-grey);
 }
+button:focus {
+    outline: none;
+}
 button:disabled {
     cursor: not-allowed;
     background-color: var(--medium-grey);
@@ -180,9 +183,11 @@ input[type=checkbox] {
     background-color: var(--white);
     border: 2px solid var(--white);
 }
-
 input[type=checkbox]:checked {
     background-color: var(--blue);
+}
+input[type=checkbox]:focus {
+    outline: none;
 }
 
 input::-webkit-outer-spin-button,
@@ -433,6 +438,58 @@ input::-webkit-inner-spin-button {
 #row-container > .spacer > .spacer-room.has-path::after {
     opacity: 1;
 }
+/* Diagonal path */
+#row-container > .spacer > .spacer {
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    flex-direction: row;
+}
+#row-container > .spacer > .spacer::after {
+    content: "";
+    flex: 1 1 auto;
+    min-width: 0;
+
+    /*
+    background-image: url(./diagonalLine.svg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    background-color: #444444;
+    */
+
+    opacity: 0;
+    --diagonal-path-color: black;
+    --diagonal-path-size: 2px;
+    --diagonal-path-fuzziness: 1px;
+
+    /* Stretch outside of this spacer but don't affect layout or mouse events:  */
+    pointer-events: none;
+    transform: scale(1.1);
+}
+#row-container > .spacer > .spacer.bottom-left::after,
+#row-container > .spacer > .spacer.upper-right::after {
+    background-image: linear-gradient(to bottom right,
+        transparent calc(50% - var(--diagonal-path-size)),
+        var(--diagonal-path-color) calc(50% + var(--diagonal-path-fuzziness) - var(--diagonal-path-size)),
+        var(--diagonal-path-color) 50%,
+        var(--diagonal-path-color) calc(50% - var(--diagonal-path-fuzziness) + var(--diagonal-path-size)),
+        transparent calc(50% + var(--diagonal-path-size))
+    );
+}
+#row-container > .spacer > .spacer.bottom-right::after,
+#row-container > .spacer > .spacer.upper-left::after {
+    background-image: linear-gradient(to bottom left,
+        transparent calc(50% - var(--diagonal-path-size)),
+        var(--diagonal-path-color) calc(50% + var(--diagonal-path-fuzziness) - var(--diagonal-path-size)),
+        var(--diagonal-path-color) 50%,
+        var(--diagonal-path-color) calc(50% - var(--diagonal-path-fuzziness) + var(--diagonal-path-size)),
+        transparent calc(50% + var(--diagonal-path-size))
+    );
+}
+#row-container > .spacer > .spacer.has-path::after {
+    opacity: 1;
+}
 
 /* Both rows and columns: */
 .spacer {
@@ -491,6 +548,20 @@ input::-webkit-inner-spin-button {
     height: 120px;
     font-size: xx-large;
     font-family: 'Commodore-64';
+}
+.menu-create-btn {
+    margin-bottom: 0;
+    margin-top: 41px;
+}
+.create-alternatives {
+    display: flex;
+    flex-direction: column;
+}
+#random-world-btn {
+    font-family: 'commodore-64';
+    font-size: medium;
+    margin-top: 3px;
+    height: 29px;
 }
 
 #circle-inputs, #branch-inputs, #square-inputs{
@@ -637,6 +708,37 @@ table {
 div .found-path-room-highlighting {
     background-color: var(--light-purple) !important;
 }
-div .found-path-spacer-highlighting {
+.spacer > .spacer.found-path-spacer-highlighting::after {
+    --diagonal-path-color: var(--white) !important;
+}
+.row > .spacer.found-path-spacer-highlighting,
+.spacer > .spacer-room.found-path-spacer-highlighting {
     background-color: var(--white) !important;
+}
+
+#offline-mode {
+    align-self: flex-start;
+    height: unset;
+    margin: auto;
+}
+
+.pathfinder-algorithm-configs {
+    height: 1.2vw;
+    font-size: 0.8vw;
+    border-width: 2px;
+    margin: 0 0 0 0.8vw;
+    white-space: nowrap;
+}
+#room-display:not(.enable-pathfinder-options) .pathfinder-options {
+    display: none;
+}
+.pathfinder-option-flex-block {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.pathfinder-options label {
+    font-size: 0.8vw;
+    margin-left: unset;
+    margin-right: 5px;
 }
