@@ -8,12 +8,12 @@ const display = document.getElementById('row-container');
 const optionalSections = document.querySelectorAll('[data-require-world]');
 const rememberWorldType = document.getElementById('remember-world-type');
 
-const hiddenNameComparisonInput = document.getElementById('name-comparison');
 const randomizeWorldNameButton = document.getElementById('btn-random-world-name');
 
 const nameConfig = document.getElementById('world-name');
-const lengthConfig = document.getElementById('world-side-length');
-const widthConfig = document.getElementById('world-side-width');
+const widthConfig = document.getElementById('world-side-length');
+const heightConfig = document.getElementById('world-side-width');
+const mazeCheckBoxConfig = document.getElementById("maze-mode");
 const numberOfRoomsConfig = document.getElementById('world-number-of-rooms');
 const startLengthConfig = document.getElementById('world-start-length');
 const branchFactorConfig = document.getElementById('world-branch-factor');
@@ -39,6 +39,7 @@ function onWorldTypeChanged() {
     }
 }
 onWorldTypeChanged();
+
 
 function randomizeWorldName() {
     const previousRandomWorldName = nameConfig.value;
@@ -79,16 +80,49 @@ const generateWorld = function (showAsWell = true) {
             }
             break;
         case 'rectangle':
-            const length = parseInt(lengthConfig.value);
             const width = parseInt(widthConfig.value);
-            if (isNaN(length) || isNaN(width)) {
+            const height = parseInt(heightConfig.value);
+            if (isNaN(width) || isNaN(height)) {
                 errorMessage = ('Invalid inputs, need to be numbers');
-            } else if (length <= 0 || width <= 0) {
+            } else if (width <= 0 || height <= 0) {
                 errorMessage = ('Numbers too small, must be 1 or larger');
-            } else if (length * width > 10000) {
+            } else if (width * height > 10000) {
                 errorMessage = ('There is such a thing as too big');
             } else {
-                createdWorld = new World(worldName, 'rectangle', length, width);
+                createdWorld = new World(worldName, 'rectangle', width, height);
+                if (mazeCheckBoxConfig.checked) {
+                    const maze = new MazeBuilder(width, height);
+                    for (let y = 1; y < maze.maze.length; y += 2) {
+                        const roomY = (y - 1) / 2;
+                        const row = maze.maze[y];
+                        // console.log(roomY, row, y + 1 < maze.maze.length ? maze.maze[y + 1] : null);
+
+                        // Horizontal walls
+                        for (let x = 2; x < row.length; x += 2) {
+                            const roomX = (x - 2) / 2;
+                            const roomBefore = createdWorld.getRoomById(roomY * createdWorld.sideLength + roomX + 1);
+                            const roomAfter = createdWorld.getRoomById(roomY * createdWorld.sideLength + roomX + 1 + 1);
+                            if (!roomBefore || !roomAfter) continue;
+                            if (row[x] && row[x].includes("wall")) {
+                                roomBefore.disconnectFrom(roomAfter);
+                            }
+                        }
+                        // Vertical walls
+                        if (y + 1 < maze.maze.length) {
+                            const nextRow = maze.maze[y + 1];
+                            for (let x = 1; x < nextRow.length; x += 2) {
+                                const roomX = (x - 1) / 2;
+                                const room = createdWorld.getRoomById(roomY * createdWorld.sideLength + roomX + 1);
+                                const roomBelow = createdWorld.getRoomById((roomY + 1) * createdWorld.sideLength + roomX + 1);
+                                if (!room || !roomBelow) continue;
+                                if (nextRow[x] && nextRow[x].includes("wall")) {
+                                    room.disconnectFrom(roomBelow);
+                                }
+                            }
+                        }
+                    }
+                    createdWorld.type = 'maze';
+                }
             }
             break;
         case 'branch':
@@ -127,7 +161,7 @@ const generateWorld = function (showAsWell = true) {
     // Show error after we clear the world preview (since that clears everything in the `row-container`)
     if (errorMessage !== null) {
         console.error('Failed to create world because: ', errorMessage);
-        messageLabel = document.createElement('span');
+        const messageLabel = document.createElement('span');
         messageLabel.textContent = errorMessage;
         display.appendChild(messageLabel);
     }
@@ -170,14 +204,29 @@ for (const [key, value] of Object.entries(buttons)) {
 
 let worldChangedSincePreview = true;
 function inputChanged() {
+    if (mazeCheckBoxConfig.checked) {
+        buttons.rectangle.textContent = 'M a z e';
+    } else {
+        buttons.rectangle.textContent = 'Rectangle';
+    }
+    if (branchCheckBoxConfig.checked) {
+        buttons.branch.style.cssText = 'width: 17vw; margin-left: 0.7vw;'
+        buttons.branch.textContent = 'Branch';
+    } else {
+        buttons.branch.style.cssText = 'width: 19vw; margin-left: -0.4vw;'
+        buttons.branch.textContent = 'Branch*';
+    }
     worldChangedSincePreview = true;
 }
+inputChanged();
+
 nameConfig.oninput = inputChanged;
 
 numberOfRoomsConfig.oninput = inputChanged;
 
-lengthConfig.oninput = inputChanged;
 widthConfig.oninput = inputChanged;
+heightConfig.oninput = inputChanged;
+mazeCheckBoxConfig.oninput = inputChanged;
 
 startLengthConfig.oninput = inputChanged;
 branchFactorConfig.oninput = inputChanged;
@@ -194,9 +243,27 @@ function saveSpecifiedWorld() {
     }
     if (currentWorld == null) {
         // No preview and failed to generate new world:
-        console.error('Please make a world first')
+        console.error('Please make a world first');
         return;
     }
+
+    const offlineMode = localStorage.getItem('pathOS_offlineModeEnabled') === 'true';
+
+    if (offlineMode) {
+        const worldIds = JSON.parse(localStorage.getItem('pathOS_worlds') || '[]');
+        let id = 1;
+        while (worldIds.includes('pathOS_world-' + id)) {
+            id++;
+        }
+        const worldKey = 'pathOS_world-' + id;
+        worldIds.push(worldKey);
+        localStorage.setItem(worldKey, JSON.stringify(currentWorld));
+        localStorage.setItem('pathOS_worlds', JSON.stringify(worldIds));
+
+        location.href = 'view.html?id=' + id;
+        return;
+    }
+
     let xhr = (window.XMLHttpRequest) ? new XMLHttpRequest() : new activeXObject("Microsoft.XMLHTTP");
     xhr.open('post', 'http://localhost:8000/api/create', true);
     xhr.send(JSON.stringify({
